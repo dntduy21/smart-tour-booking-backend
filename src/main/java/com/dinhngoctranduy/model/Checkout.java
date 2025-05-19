@@ -1,32 +1,48 @@
 package com.dinhngoctranduy.model;
 
+import com.dinhngoctranduy.util.constant.PaymentGateway;
+import com.dinhngoctranduy.util.constant.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
+@Table(name = "checkouts")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "checkouts")
+@AllArgsConstructor
+@Builder
 public class Checkout {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
-    private String paymentMethod;
-    private LocalDateTime paymentDate;
-    private double amount;
-    private String paymentStatus;
-    private String transactionId;
+    @Enumerated(EnumType.STRING)
+    private PaymentGateway method;     // VNPAY, MOMO, BANK_TRANSFER,…
 
-    @OneToOne
+    private String orderInfo;          // ghi chú đơn
+
+    private Instant paidAt;
+    private double amount;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;      // UNPAID, PAID, FAILED
+
+    @Column(unique = true)
+    private String transactionId;      // mã giao dịch PSP
+
+    // Chi tiết PSP trả về
+    private String responseCode;
+    private String errorMessage;
+    private String bankCode;
+    private String qrCodeUrl;          // nếu là MoMo QR
+
+    @Lob
+    private String callbackData;       // toàn bộ payload
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 }
-

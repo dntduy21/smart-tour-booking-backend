@@ -37,7 +37,7 @@ public class UserService {
     }
 
     public User handleUpdateUser(User reqUser) {
-        User userCurrent = this.fetchUserById(reqUser.getUserId());
+        User userCurrent = this.fetchUserById(reqUser.getId());
         if (userCurrent != null) {
             userCurrent.setUsername(reqUser.getUsername());
             userCurrent.setPassword(reqUser.getPassword());
@@ -58,9 +58,13 @@ public class UserService {
         return this.userRepository.existsByUsername(username);
     }
 
+    public boolean isEmailExists(String email) {
+        return this.userRepository.existsByEmail(email);
+    }
+
     public ResCreateUserDTO resCreateUserDTO(User user) {
         ResCreateUserDTO createUserDTO = new ResCreateUserDTO();
-        createUserDTO.setId(user.getUserId());
+        createUserDTO.setId(user.getId());
         createUserDTO.setUsername(user.getUsername());
         createUserDTO.setEmail(user.getEmail());
         createUserDTO.setAddress(user.getAddress());

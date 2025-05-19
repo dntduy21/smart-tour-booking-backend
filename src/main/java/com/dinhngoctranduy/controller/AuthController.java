@@ -3,6 +3,7 @@ package com.dinhngoctranduy.controller;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.VerificationToken;
 import com.dinhngoctranduy.model.dto.LoginDTO;
+import com.dinhngoctranduy.model.dto.RegisterDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResLoginDTO;
 import com.dinhngoctranduy.service.EmailService;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -59,7 +61,7 @@ public class AuthController {
         ResLoginDTO res = new ResLoginDTO();
         User userCurrentDB = this.userService.handleGetUserByUsername(loginDTO.getUsername());
         if (userCurrentDB != null) {
-            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userCurrentDB.getUserId(),
+            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userCurrentDB.getId(),
                     userCurrentDB.getEmail(), userCurrentDB.getUsername());
             res.setUser(userLogin);
         }
@@ -68,26 +70,37 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User user) throws IdInValidException {
-        // Kiểm tra username đã tồn tại
-        if (userService.isUsernameExists(user.getUsername())) {
+    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody RegisterDTO dto) throws IdInValidException {
+        if (userService.isUsernameExists(dto.getUsername())) {
             throw new IdInValidException("Username đã tồn tại");
         }
 
-        // Mã hóa mật khẩu và gán emailVerified = false
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEmailVerified(false);
-        User newUser = userService.handleCreateUser(user); // Lưu vào DB
+        if (userService.isEmailExists(dto.getEmail())) {
+            throw new IdInValidException("Email đã được sử dụng");
+        }
 
-        // Tạo token xác thực
+        // Build User từ DTO
+        User newUser = User.builder()
+                .username(dto.getUsername())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .address(dto.getAddress())
+                .birthDate(dto.getBirthDate())
+                .gender(dto.getGender())
+                .emailVerified(false)
+//                .role(roleService.getDefaultUserRole()) // gán mặc định "USER"
+                .build();
+
+        userService.handleCreateUser(newUser);
+
         VerificationToken token = verificationTokenService.createVerificationToken(newUser);
-
-        // Gửi email xác thực
         emailService.sendVerificationEmail(newUser, token.getToken());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userService.resCreateUserDTO(newUser));
     }
+
 
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {

@@ -1,41 +1,55 @@
 package com.dinhngoctranduy.model;
 
+import com.dinhngoctranduy.util.constant.BookingStatus;
+import com.dinhngoctranduy.util.constant.PaymentStatus;
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
 
 @Entity
 @Table(name = "bookings")
-public class Booking {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Booking extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime date;
-    private int numAdults;
-    private int numChildren;
+    private Instant bookingDate;
+    private int adults;
+    private int children;
     private double totalPrice;
-    private String paymentStatus;
-    private String bookingStatus;
-    private boolean deleted;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    // Guest booking info
+    private String guestName;
+    private String guestEmail;
+    private String guestPhone;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Invoice invoice;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Checkout checkout;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 }

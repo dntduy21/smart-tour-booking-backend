@@ -22,7 +22,7 @@ public class VerificationTokenService {
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
         verificationToken.setUser(user);
-        verificationToken.setExpiryDate(LocalDateTime.now().plusDays(1)); // hết hạn sau 1 ngày
+        verificationToken.setExpiresAt(LocalDateTime.now().plusDays(1)); // hết hạn sau 1 ngày
         return tokenRepo.save(verificationToken);
     }
 
