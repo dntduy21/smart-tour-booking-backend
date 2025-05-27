@@ -8,11 +8,10 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class ResCreateUserDTO {
+public class ResUpdateUserDTO {
     private long id;
-    private String username;
     private String fullName;
-    private String email;
+    private String password;
     private String address;
     private String phone;
     private LocalDate birthDate;

@@ -3,7 +3,6 @@ package com.dinhngoctranduy.controller;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.VerificationToken;
 import com.dinhngoctranduy.model.dto.LoginDTO;
-import com.dinhngoctranduy.model.dto.RegisterDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResLoginDTO;
 import com.dinhngoctranduy.service.EmailService;
@@ -21,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -70,35 +68,24 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody RegisterDTO dto) throws IdInValidException {
-        if (userService.isUsernameExists(dto.getUsername())) {
+    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User user) throws IdInValidException {
+        if (userService.isUsernameExists(user.getUsername())) {
             throw new IdInValidException("Username đã tồn tại");
         }
 
-        if (userService.isEmailExists(dto.getEmail())) {
+        if (userService.isEmailExists(user.getEmail())) {
             throw new IdInValidException("Email đã được sử dụng");
         }
 
-        // Build User từ DTO
-        User newUser = User.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .address(dto.getAddress())
-                .birthDate(dto.getBirthDate())
-                .gender(dto.getGender())
-                .emailVerified(false)
-//                .role(roleService.getDefaultUserRole()) // gán mặc định "USER"
-                .build();
+        String hashPassword = this.passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashPassword);
 
-        userService.handleCreateUser(newUser);
+        User newUser = this.userService.handleCreateUser(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(newUser);
         emailService.sendVerificationEmail(newUser, token.getToken());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.resCreateUserDTO(newUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.resCreateUserDTO(newUser));
     }
 
 
@@ -118,5 +105,23 @@ public class AuthController {
         user.setEmailVerified(true);
         userService.handleUpdateUser(user);
         return ResponseEntity.ok("Email đã được xác thực, bạn có thể đăng nhập.");
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<ResLoginDTO.UserLogin> getAccount() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        User currentUserDB = this.userService.handleGetUserByUsername(email);
+        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
+
+        if (currentUserDB != null) {
+            userLogin.setId(currentUserDB.getId());
+            userLogin.setEmail(currentUserDB.getEmail());
+            userLogin.setName(currentUserDB.getUsername());
+        }
+
+        return ResponseEntity.ok().body(userLogin);
     }
 }

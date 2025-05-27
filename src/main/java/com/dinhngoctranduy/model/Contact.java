@@ -17,7 +17,7 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Contact extends BaseEntity {
+public class Contact {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

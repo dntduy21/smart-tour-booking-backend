@@ -41,9 +41,10 @@ public class SecurityConfig {
                                            CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         http
                 .csrf(c -> c.disable())
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         authz -> authz
-                                .requestMatchers("/api/v1/login", "/api/v1/register", "api/v1/verify").permitAll()
+                                .requestMatchers("/api/v1/login", "/api/v1/register", "api/v1/verify", "/storage/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

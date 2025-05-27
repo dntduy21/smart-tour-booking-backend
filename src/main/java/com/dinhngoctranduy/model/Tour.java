@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Tour extends BaseEntity {
+public class Tour {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

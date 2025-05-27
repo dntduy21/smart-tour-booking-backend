@@ -1,14 +1,19 @@
 package com.dinhngoctranduy.controller;
 
 import com.dinhngoctranduy.model.User;
+import com.dinhngoctranduy.model.dto.ResultPaginationDTO;
+import com.dinhngoctranduy.model.response.ResUpdateUserDTO;
 import com.dinhngoctranduy.service.UserService;
 import com.dinhngoctranduy.util.error.IdInValidException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -21,18 +26,8 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        String hashPassword = this.passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashPassword);
-        User userNew = this.userService.handleCreateUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userNew);
-    }
-
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) throws IdInValidException {
-        if (id > 1500)
-            throw new IdInValidException("Id khong lon hon 1500");
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws IdInValidException {
         this.userService.handleDeleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
@@ -44,13 +39,22 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUser() {
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.fetchAllUser());
+    public ResponseEntity<ResultPaginationDTO> getAllUser(
+            @RequestParam("current") Optional<String> currentOptional,
+            @RequestParam("pageSize") Optional<String> pageSizeOptional) {
+        String sCurrent = currentOptional.isPresent() ? currentOptional.get() : "";
+        String sPageSize = pageSizeOptional.isPresent() ? pageSizeOptional.get() : "";
+        int current = Integer.parseInt(sCurrent);
+        int pageSize = Integer.parseInt(sPageSize);
+        Pageable pageable = PageRequest.of(current - 1, pageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.fetchAllUser(pageable));
     }
 
     @PutMapping("/users")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
+    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User user) {
+        String hashPassword = this.passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashPassword);
         User userUpdate = this.userService.handleUpdateUser(user);
-        return ResponseEntity.status(HttpStatus.OK).body(userUpdate);
+        return ResponseEntity.status(HttpStatus.OK).body(userService.resUpdateUserDTO(userUpdate));
     }
 }

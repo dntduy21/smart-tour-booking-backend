@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,6 +29,8 @@ public class User extends BaseEntity {
 
     @NotBlank
     private String password;
+
+    private String fullName;
 
     @Email
     @NotBlank
@@ -43,6 +45,10 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    private String avatarUrl;
+
+    private boolean deleted = false;
 
     private boolean emailVerified = false;
 
