@@ -3,6 +3,8 @@ package com.dinhngoctranduy.controller;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.dto.ResultPaginationDTO;
 import com.dinhngoctranduy.model.response.ResUpdateUserDTO;
+import com.dinhngoctranduy.model.response.ResUserDTO;
+import com.dinhngoctranduy.service.RoleService;
 import com.dinhngoctranduy.service.UserService;
 import com.dinhngoctranduy.util.error.IdInValidException;
 import org.springframework.data.domain.PageRequest;
@@ -20,10 +22,13 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder
+            , RoleService roleService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     @DeleteMapping("/users/{id}")
@@ -33,9 +38,12 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = this.userService.fetchUserById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+    public ResponseEntity<ResUserDTO> getUserById(@PathVariable long id) throws IdInValidException {
+        User curUser = this.userService.fetchUserById(id);
+        if (curUser == null) {
+            throw new IdInValidException("Không tìm thấy người dùng có id = " + id);
+        }
+        return ResponseEntity.ok(this.userService.resUserDTO(curUser));
     }
 
     @GetMapping("/users")

@@ -30,6 +30,8 @@ public class Permission {
     @NotBlank(message = "method không được để trống")
     private String method;
 
+    private String module;
+
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "permissions")
     @JsonIgnore
     private List<Role> roles;

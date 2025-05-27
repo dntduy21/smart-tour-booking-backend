@@ -1,11 +1,13 @@
 package com.dinhngoctranduy.controller;
 
+import com.dinhngoctranduy.model.Role;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.VerificationToken;
 import com.dinhngoctranduy.model.dto.LoginDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResLoginDTO;
 import com.dinhngoctranduy.service.EmailService;
+import com.dinhngoctranduy.service.RoleService;
 import com.dinhngoctranduy.service.UserService;
 import com.dinhngoctranduy.service.VerificationTokenService;
 import com.dinhngoctranduy.util.SecurityUtil;
@@ -31,19 +33,22 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
+    private final RoleService roleService;
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
                           SecurityUtil securityUtil,
                           UserService userService,
                           PasswordEncoder passwordEncoder,
                           VerificationTokenService verificationTokenService,
-                          EmailService emailService) {
+                          EmailService emailService,
+                          RoleService roleService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.verificationTokenService = verificationTokenService;
         this.emailService = emailService;
+        this.roleService = roleService;
     }
 
     @PostMapping("/login")
@@ -58,9 +63,11 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         ResLoginDTO res = new ResLoginDTO();
         User userCurrentDB = this.userService.handleGetUserByUsername(loginDTO.getUsername());
+        Role role = userCurrentDB.getRole();
+        ResLoginDTO.RoleDTO roleDTO = new ResLoginDTO.RoleDTO(role.getId(), role.getName());
         if (userCurrentDB != null) {
             ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userCurrentDB.getId(),
-                    userCurrentDB.getEmail(), userCurrentDB.getUsername());
+                    userCurrentDB.getEmail(), userCurrentDB.getUsername(), roleDTO);
             res.setUser(userLogin);
         }
         res.setAccessToken(access_token);
@@ -79,6 +86,9 @@ public class AuthController {
 
         String hashPassword = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
+
+        Role defaultRole = this.roleService.fetchById(2);
+        user.setRole(defaultRole);
 
         User newUser = this.userService.handleCreateUser(user);
 
@@ -120,6 +130,9 @@ public class AuthController {
             userLogin.setId(currentUserDB.getId());
             userLogin.setEmail(currentUserDB.getEmail());
             userLogin.setName(currentUserDB.getUsername());
+            Role role = currentUserDB.getRole();
+            ResLoginDTO.RoleDTO roleDTO = new ResLoginDTO.RoleDTO(role.getId(), role.getName());
+            userLogin.setRole(roleDTO);
         }
 
         return ResponseEntity.ok().body(userLogin);

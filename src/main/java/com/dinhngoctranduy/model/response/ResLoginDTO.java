@@ -1,5 +1,6 @@
 package com.dinhngoctranduy.model.response;
 
+import com.dinhngoctranduy.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,16 @@ public class ResLoginDTO {
     public static class UserLogin {
         private long id;
         private String email;
+        private String name;
+        private RoleDTO role;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RoleDTO {
+        private Long id;
         private String name;
     }
 }
