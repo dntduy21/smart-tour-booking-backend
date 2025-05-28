@@ -7,6 +7,7 @@ import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResUpdateUserDTO;
 import com.dinhngoctranduy.model.response.ResUserDTO;
 import com.dinhngoctranduy.repository.UserRepository;
+import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,29 @@ public class UserService {
         }
     }
 
+    public void handleBlockUser(Long id) throws UserNotFoundExceptionCustom {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundExceptionCustom("Không tìm thấy người dùng với ID: " + id));
+
+        if (user.isBlocked()) {
+            throw new UserNotFoundExceptionCustom("Người dùng (ID: " + id + ") đã bị chặn từ trước.");
+        }
+
+        user.setBlocked(true);
+        userRepository.save(user);
+    }
+
+    public void handleUnblockUser(Long id) throws UserNotFoundExceptionCustom {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundExceptionCustom("Không tìm thấy người dùng với ID: " + id));
+
+        if (!user.isBlocked()) {
+            throw new UserNotFoundExceptionCustom("Người dùng (ID: " + id + ") hiện không bị chặn.");
+        }
+
+        user.setBlocked(false);
+        userRepository.save(user);
+    }
 
     public User fetchUserById(Long id) {
         Optional<User> userOptional = this.userRepository.findById(id);

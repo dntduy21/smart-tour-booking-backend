@@ -27,6 +27,12 @@ public class UserDetailCustom implements UserDetailsService {
         if (!user.isEmailVerified()) {
             throw new RuntimeException("Email chưa được xác thực.");
         }
+        if (user.isDeleted()) {
+            throw new RuntimeException("Tài khoản của bạn đã xoá");
+        }
+        if (user.isBlocked()) {
+            throw new RuntimeException("Tài khoản của bạn đã bị khoá vui lòng liên hệ với quản trị viên để biết thêm thông tin");
+        }
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

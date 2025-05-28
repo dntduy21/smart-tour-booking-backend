@@ -7,6 +7,7 @@ import com.dinhngoctranduy.model.response.ResUserDTO;
 import com.dinhngoctranduy.service.RoleService;
 import com.dinhngoctranduy.service.UserService;
 import com.dinhngoctranduy.util.error.IdInValidException;
+import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,18 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws IdInValidException {
         this.userService.handleDeleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @PutMapping("/users/{id}/block")
+    public ResponseEntity<String> blockUser(@PathVariable Long id) throws UserNotFoundExceptionCustom {
+        this.userService.handleBlockUser(id);
+        return ResponseEntity.ok("Người dùng (ID: " + id + ") đã bị chặn thành công.");
+    }
+
+    @PutMapping("/users/{id}/unblock")
+    public ResponseEntity<String> unblockUser(@PathVariable Long id) throws UserNotFoundExceptionCustom {
+        this.userService.handleUnblockUser(id);
+        return ResponseEntity.ok("Người dùng (ID: " + id + ") đã được mở chặn thành công.");
     }
 
     @GetMapping("/users/{id}")

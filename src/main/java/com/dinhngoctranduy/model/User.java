@@ -50,6 +50,8 @@ public class User {
 
     private boolean deleted = false;
 
+    private boolean blocked = false;
+
     private boolean emailVerified = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
