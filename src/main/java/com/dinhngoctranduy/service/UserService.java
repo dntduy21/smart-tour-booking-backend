@@ -71,6 +71,11 @@ public class UserService {
         return null;
     }
 
+    public User fetchUserByEmail(String email) {
+        User user = this.userRepository.findByEmailContainingIgnoreCase(email);
+        return user;
+    }
+
     public ResUserDTO resUserDTO(User user) {
         ResUserDTO res = new ResUserDTO();
         ResUserDTO.RoleUser roleUser = new ResUserDTO.RoleUser();

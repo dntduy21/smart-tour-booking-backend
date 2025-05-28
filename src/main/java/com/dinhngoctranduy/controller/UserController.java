@@ -50,6 +50,12 @@ public class UserController {
         return ResponseEntity.ok("Người dùng (ID: " + id + ") đã được mở chặn thành công.");
     }
 
+    @GetMapping("/usersbyemail/{keyword}")
+    public ResponseEntity<ResUserDTO> getUserById(@PathVariable("keyword") String email) {
+        User user = this.userService.fetchUserByEmail(email);
+        return ResponseEntity.ok(this.userService.resUserDTO(user));
+    }
+
     @GetMapping("/users/{id}")
     public ResponseEntity<ResUserDTO> getUserById(@PathVariable long id) throws IdInValidException {
         User curUser = this.userService.fetchUserById(id);
