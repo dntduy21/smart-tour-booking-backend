@@ -43,12 +43,6 @@ public class Tour {
     @Enumerated(EnumType.STRING)
     private TourCategory category;
 
-    // 1. Giá em bé
-    private double priceInfants;
-
-    // 2. Phụ thu phòng đơn
-    private double singleSupplementFee;
-
     // 3. Hãng hàng không
     private String airline;
 
@@ -70,9 +64,6 @@ public class Tour {
     // Availability flag
     private boolean available;
 
-    @ElementCollection
-    @CollectionTable(name = "tour_itineraries", joinColumns = @JoinColumn(name = "tour_id"))
-    @Column(name = "stop")
     private List<String> itinerary = new ArrayList<>();
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

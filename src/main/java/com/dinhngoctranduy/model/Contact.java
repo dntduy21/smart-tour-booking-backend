@@ -37,10 +37,10 @@ public class Contact {
     private String email;
 
     @NotBlank
-    private String nationality;
+    private String nationality; // Quốc tịch
 
     @NotBlank
-    private String country;
+    private String country; // Quốc gia
 
     @NotBlank
     private String phone;
@@ -55,16 +55,15 @@ public class Contact {
     private Instant startDate;
     private Instant endDate;
 
-    private boolean isDateFixed;
+    private boolean isDateFixed; // ngày cố định hay linh hoạt
 
     private String travelPreference; // ví dụ: "Máy bay", "Tàu hỏa"
 
     private int numberOfAdults;
     private int numberOfChildren;
-    private int numberOfInfants;
 
     private int numberOfRooms;
-    private String hotelStandard;
+    private String hotelStandard; // chuẩn khách sạng
 
     // Yêu cầu phòng
     private boolean smoking;
@@ -73,7 +72,6 @@ public class Contact {
     private boolean doubleRoom;
     private boolean kingQueenBed;
     private boolean vipRoom;
-    private boolean specialRequest;
 
     @Enumerated(EnumType.STRING)
     private ContactStatus contactStatus;

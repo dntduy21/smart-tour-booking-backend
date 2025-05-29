@@ -19,13 +19,24 @@ public class History {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String action;
-    private Instant occurredAt;
+    private Instant occurredAt; // thời gian lịch sử
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tour_id")
+    @JoinColumn(name = "tour_id", nullable = true)
     private Tour tour;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = true)
+    private Booking booking;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.occurredAt == null) {
+            this.occurredAt = Instant.now();
+        }
+    }
 }

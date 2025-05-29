@@ -16,7 +16,7 @@ import java.time.Instant;
 @Builder
 public class Checkout {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)

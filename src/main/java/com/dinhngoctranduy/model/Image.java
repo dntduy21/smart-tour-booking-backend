@@ -19,7 +19,6 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String url;
-    private String caption;
     private Instant uploadedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

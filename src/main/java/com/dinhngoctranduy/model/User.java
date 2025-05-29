@@ -46,8 +46,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private String avatarUrl;
-
     private boolean deleted = false;
 
     private boolean blocked = false;
