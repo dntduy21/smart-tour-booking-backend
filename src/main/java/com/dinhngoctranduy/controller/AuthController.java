@@ -6,6 +6,7 @@ import com.dinhngoctranduy.model.VerificationToken;
 import com.dinhngoctranduy.model.dto.LoginDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResLoginDTO;
+import com.dinhngoctranduy.model.response.ResUserDTO;
 import com.dinhngoctranduy.service.EmailService;
 import com.dinhngoctranduy.service.RoleService;
 import com.dinhngoctranduy.service.UserService;
@@ -118,20 +119,24 @@ public class AuthController {
     }
 
     @GetMapping("/account")
-    public ResponseEntity<ResLoginDTO.UserLogin> getAccount() {
+    public ResponseEntity<ResUserDTO> getAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent()
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
 
         User currentUserDB = this.userService.handleGetUserByUsername(email);
-        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
+        ResUserDTO userLogin = new ResUserDTO();
 
         if (currentUserDB != null) {
             userLogin.setId(currentUserDB.getId());
             userLogin.setEmail(currentUserDB.getEmail());
-            userLogin.setName(currentUserDB.getUsername());
+            userLogin.setFullName(currentUserDB.getFullName());
+            userLogin.setPhone(currentUserDB.getPhone());
+            userLogin.setAddress(currentUserDB.getAddress());
+            userLogin.setBirthDate(currentUserDB.getBirthDate());
+            userLogin.setGender(currentUserDB.getGender());
             Role role = currentUserDB.getRole();
-            ResLoginDTO.RoleDTO roleDTO = new ResLoginDTO.RoleDTO(role.getId(), role.getName());
+            ResUserDTO.RoleUser roleDTO = new ResUserDTO.RoleUser(role.getId(), role.getName());
             userLogin.setRole(roleDTO);
         }
 

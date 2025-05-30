@@ -86,6 +86,7 @@ public class UserService {
         }
         res.setId(user.getId());
         res.setFullName(user.getFullName());
+        res.setEmail(user.getEmail());
         res.setPhone(user.getPhone());
         res.setAddress(user.getAddress());
         res.setBirthDate(user.getBirthDate());

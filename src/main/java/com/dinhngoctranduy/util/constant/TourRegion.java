@@ -1,3 +1,3 @@
 package com.dinhngoctranduy.util.constant;
 
-public enum TourRegion {DOMESTIC, INTERNATIONAL}
+public enum TourRegion {TRONGNUOC, NUOCNGOAI}

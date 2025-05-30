@@ -15,6 +15,7 @@ import java.time.LocalDate;
 public class ResUserDTO {
     private long id;
     private String fullName;
+    private String email;
     private String address;
     private String phone;
     private LocalDate birthDate;

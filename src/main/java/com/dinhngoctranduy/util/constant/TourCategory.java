@@ -1,3 +1,3 @@
 package com.dinhngoctranduy.util.constant;
 
-public enum TourCategory {HOLIDAY, SEASONAL, CULTURAL, ADVENTURE}
+public enum TourCategory {BAC, TRUNG, NAM}
