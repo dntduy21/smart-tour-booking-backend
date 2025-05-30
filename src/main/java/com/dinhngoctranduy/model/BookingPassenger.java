@@ -33,9 +33,6 @@ public class BookingPassenger {
 
     private String phone;
 
-    @Column(nullable = false)
-    private boolean hasSingleSupplement = false; // Mặc định là không yêu cầu phòng đơn
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;

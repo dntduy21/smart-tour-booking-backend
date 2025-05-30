@@ -19,6 +19,8 @@ public class Promotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String code;
+
     @Column(length = 1000)
     private String description;
     private double discountPercent;
