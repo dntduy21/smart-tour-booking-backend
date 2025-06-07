@@ -88,7 +88,7 @@ public class AuthController {
         String hashPassword = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
 
-        Role defaultRole = this.roleService.fetchById(2);
+        Role defaultRole = this.roleService.fetchById(1);
         user.setRole(defaultRole);
 
         User newUser = this.userService.handleCreateUser(user);

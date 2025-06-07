@@ -76,9 +76,6 @@ public class Tour {
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<History> histories = new ArrayList<>();
-
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<>();
 }

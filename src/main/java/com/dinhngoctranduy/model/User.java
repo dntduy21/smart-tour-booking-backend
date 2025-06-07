@@ -63,8 +63,5 @@ public class User {
     private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Contact> contacts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<History> histories = new ArrayList<>();
+    private List<CustomTour> customTours = new ArrayList<>();
 }

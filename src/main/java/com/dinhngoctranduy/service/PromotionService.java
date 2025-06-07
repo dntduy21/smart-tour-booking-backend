@@ -1,6 +1,5 @@
 package com.dinhngoctranduy.service;
 
-import com.dinhngoctranduy.model.Promotion;
 import com.dinhngoctranduy.model.dto.PromotionRequest;
 import com.dinhngoctranduy.model.dto.PromotionResponse;
 

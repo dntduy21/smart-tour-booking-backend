@@ -63,9 +63,6 @@ public class Booking {
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
-    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
-    private List<History> histories = new ArrayList<>();
-
     public String getEmail() {
         return user == null? guestEmail : user.getEmail();
     }

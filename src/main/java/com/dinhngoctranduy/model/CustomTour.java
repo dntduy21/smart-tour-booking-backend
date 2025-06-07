@@ -1,15 +1,11 @@
 package com.dinhngoctranduy.model;
 
-import com.dinhngoctranduy.util.constant.TourCategory;
 import com.dinhngoctranduy.util.constant.TourRegion;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "custom_tours")
@@ -53,4 +49,9 @@ public class CustomTour {
     }
 
     private boolean deleted = false;
+
+    // Người dùng đăng nhập (nullable)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

@@ -46,35 +46,35 @@ public class EmailService {
 
     public String buildBookingConfirmationHtml(String guestName, String tourTitle, String bookingId, double price) {
         return """
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { font-family: Arial, sans-serif; }
-                .header { background-color: #f2f2f2; padding: 10px; }
-                .content { margin-top: 20px; }
-                .footer { margin-top: 30px; font-size: 13px; color: gray; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>Chào %s,</h2>
-            </div>
-            <div class="content">
-                <p>Bạn đã đặt tour thành công 🎉</p>
-                <p><strong>Tên tour:</strong> %s</p>
-                <p><strong>Mã đơn hàng:</strong> %s</p>
-                <p><strong>Tổng số tiền:</strong> %, .0f VND</p>
-                <br>
-                <p>Chúng tôi sẽ liên hệ bạn sớm để xác nhận thông tin chi tiết.</p>
-            </div>
-            <div class="footer">
-                <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
-                <p>— Đội ngũ hỗ trợ TourVN</p>
-            </div>
-        </body>
-        </html>
-        """.formatted(guestName, tourTitle, bookingId, price);
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        .header { background-color: #f2f2f2; padding: 10px; }
+                        .content { margin-top: 20px; }
+                        .footer { margin-top: 30px; font-size: 13px; color: gray; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>Chào %s,</h2>
+                    </div>
+                    <div class="content">
+                        <p>Bạn đã đặt tour thành công 🎉</p>
+                        <p><strong>Tên tour:</strong> %s</p>
+                        <p><strong>Mã đơn hàng:</strong> %s</p>
+                        <p><strong>Tổng số tiền:</strong> %, .0f VND</p>
+                        <br>
+                        <p>Chúng tôi sẽ liên hệ bạn sớm để xác nhận thông tin chi tiết.</p>
+                    </div>
+                    <div class="footer">
+                        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+                        <p>— Đội ngũ hỗ trợ TourVN</p>
+                    </div>
+                </body>
+                </html>
+                """.formatted(guestName, tourTitle, bookingId, price);
     }
 
     public void sendHtmlEmail(String to, String subject, String htmlContent) {

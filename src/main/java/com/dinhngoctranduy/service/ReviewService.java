@@ -1,6 +1,5 @@
 package com.dinhngoctranduy.service;
 
-import com.dinhngoctranduy.model.Review;
 import com.dinhngoctranduy.model.dto.ReviewDTO;
 
 import java.util.List;

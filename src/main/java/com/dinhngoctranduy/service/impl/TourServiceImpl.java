@@ -22,10 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -50,7 +47,6 @@ public class TourServiceImpl implements TourService {
         }
         Tour tour = toEntity(dto);
         tour.setBookings(Collections.emptyList());
-        tour.setHistories(Collections.emptyList());
         return toDto(tourRepository.save(tour));
     }
 
