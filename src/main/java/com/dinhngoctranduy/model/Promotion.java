@@ -29,6 +29,8 @@ public class Promotion {
     private Instant endAt;
     private int usageLimit;
 
+    private boolean active = true;
+
     @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<>();
 

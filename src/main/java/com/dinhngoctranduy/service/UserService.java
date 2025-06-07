@@ -7,9 +7,11 @@ import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResUpdateUserDTO;
 import com.dinhngoctranduy.model.response.ResUserDTO;
 import com.dinhngoctranduy.repository.UserRepository;
+import com.dinhngoctranduy.repository.UserSpecification;
 import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -108,6 +110,13 @@ public class UserService {
                 .collect(Collectors.toList());
         resultPaginationDTO.setResult(listUser);
         return resultPaginationDTO;
+    }
+
+    public List<User> searchUsers(String keyword, Pageable pageable) {
+        Specification<User> spec = Specification
+                .where(UserSpecification.hasKeyword(keyword));
+
+        return userRepository.findAll(spec, pageable).getContent();
     }
 
     public User handleUpdateUser(User reqUser) {

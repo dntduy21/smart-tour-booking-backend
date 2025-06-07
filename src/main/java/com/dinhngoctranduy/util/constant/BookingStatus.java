@@ -1,3 +1,3 @@
 package com.dinhngoctranduy.util.constant;
 
-public enum BookingStatus {PENDING, CONFIRMED, CANCELLED}
+public enum BookingStatus {PENDING, CONFIRMED, CANCELLED, COMPLETED}

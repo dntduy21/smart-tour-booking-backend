@@ -52,26 +52,6 @@ public class RoleService {
         return null;
     }
 
-//    public Role update(Role r) {
-//        Role roleDB = this.fetchById(r.getId());
-//        // check permissions
-//        if (r.getPermissions() != null) {
-//            List<Long> reqPermissions = r.getPermissions()
-//                    .stream().map(x -> x.getId())
-//                    .collect(Collectors.toList());
-//
-//            List<Permission> dbPermissions = this.permissionRepository.findByIdIn(reqPermissions);
-//            r.setPermissions(dbPermissions);
-//        }
-//
-//        roleDB.setName(r.getName());
-//        roleDB.setDescription(r.getDescription());
-//        roleDB.setActive(r.isActive());
-//        roleDB.setPermissions(r.getPermissions());
-//        roleDB = this.roleRepository.save(roleDB);
-//        return roleDB;
-//    }
-
     @Transactional
     public Role update(Role r) {
         // 1. Lấy Role hiện tại từ cơ sở dữ liệu

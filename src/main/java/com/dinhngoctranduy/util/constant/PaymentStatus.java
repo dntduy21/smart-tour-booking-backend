@@ -1,3 +1,3 @@
 package com.dinhngoctranduy.util.constant;
 
-public enum PaymentStatus {UNPAID, PAID, REFUNDED}
+public enum PaymentStatus {UNPAID, PAID, REFUNDED, CASH}

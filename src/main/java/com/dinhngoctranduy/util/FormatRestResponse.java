@@ -25,6 +25,11 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
             Class selectedConverterType,
             ServerHttpRequest request,
             ServerHttpResponse response) {
+        String path = request.getURI().getPath();
+
+        if (path.startsWith("/api/v1/tours/export") || path.contains("/export/")) {
+            return body;
+        }
         HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
         int status = servletResponse.getStatus();
         RestResponse<Object> res = new RestResponse<>();
@@ -39,7 +44,7 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
         //case success
         else {
             res.setData(body);
-            res.setMessage("CALL API SUCCESS");
+            res.setMessage("Success");
         }
         return res;
     }

@@ -6,6 +6,7 @@ import com.nimbusds.jose.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,10 +41,19 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         String[] whiteList = {
+                "/api/v1/ping",
+                "/api/v1/**",
                 "/api/v1/login",
                 "/api/v1/register",
-                "api/v1/verify",
-                "/storage/**"
+                "/api/v1/verify",
+                "/storage/**",
+                "/api/v1/tours/search",
+                "/api/v1/tour/custom",
+                "/api/v1/tours/*",
+                "/api/v1/bookings/create",
+                "/api/v1/bookings/*/cancel",
+                "/api/v1/bookings/vnpay-return",
+
         };
         http
                 .csrf(c -> c.disable())
@@ -51,7 +61,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
-                                .anyRequest().authenticated())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/tours/*/export/pdf").permitAll()
+                                .anyRequest().permitAll())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .exceptionHandling(

@@ -1,6 +1,9 @@
-package com.dinhngoctranduy.util.error;
+package com.dinhngoctranduy.exceptions.handler;
 
+import com.dinhngoctranduy.exceptions.InvalidDataException;
 import com.dinhngoctranduy.model.response.RestResponse;
+import com.dinhngoctranduy.util.error.IdInValidException;
+import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,10 +16,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalException {
+public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestResponse<Object>> handleAllException(Exception ex) {
         RestResponse<Object> res = new RestResponse<Object>();
@@ -69,4 +73,14 @@ public class GlobalException {
         res.setError("Operation Redundant");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
     }
+
+    @ExceptionHandler(InvalidDataException.class)
+    public ResponseEntity<?> handleIllegalArg(InvalidDataException ex) {
+        RestResponse<Object> res = new RestResponse<Object>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setMessage(ex.getMessage());
+        res.setError("Invalid Data");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
 }

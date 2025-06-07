@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -83,5 +84,17 @@ public class UserController {
         user.setPassword(hashPassword);
         User userUpdate = this.userService.handleUpdateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(userService.resUpdateUserDTO(userUpdate));
+    }
+
+    @GetMapping("/users/search")
+    public ResponseEntity<List<ResUserDTO>> searchUsers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ResUserDTO> data = userService.searchUsers(keyword, pageable)
+                .stream().map(userService::resUserDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(data);
     }
 }

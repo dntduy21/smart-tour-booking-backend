@@ -1,5 +1,6 @@
 package com.dinhngoctranduy.model;
 
+import com.dinhngoctranduy.util.StringListConverter;
 import com.dinhngoctranduy.util.constant.TourCategory;
 import com.dinhngoctranduy.util.constant.TourRegion;
 import jakarta.persistence.*;
@@ -64,6 +65,9 @@ public class Tour {
     // Availability flag
     private boolean available;
 
+    private boolean deleted = false;
+
+    @Convert(converter = StringListConverter.class)
     private List<String> itinerary = new ArrayList<>();
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
