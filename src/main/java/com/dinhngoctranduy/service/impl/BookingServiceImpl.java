@@ -58,6 +58,14 @@ public class BookingServiceImpl implements BookingService {
         Tour tour = tourRepo.findByIdAndDeletedFalse(req.getTourId()).orElseThrow(() -> {
             throw new InvalidDataException("Tour not found with id = " + req.getTourId());
         });
+        Instant time = Instant.now();
+
+        if (tour.getStartDate() != null) {
+            Instant tourStartInstant = tour.getStartDate().atZone(ZoneId.systemDefault()).toInstant();
+            if (time.isAfter(tourStartInstant) || time.equals(tourStartInstant)) {
+                throw new RuntimeException("Đã quá hạn đặt tour. Không thể đặt tour sau hoặc trong ngày khởi hành.");
+            }
+        }
         int totalPeople = req.getAdults() + req.getChildren();
         if (tour.getCapacity() < totalPeople) throw new RuntimeException("Không đủ chỗ cho tour này.");
         else {
@@ -85,11 +93,11 @@ public class BookingServiceImpl implements BookingService {
         }
 
         User user = null;
-        if(req.getUserId() != null) {
+        if (req.getUserId() != null) {
             user = userRepository.findById(req.getUserId()).orElse(
-                null
+                    null
             );
-            if(user == null) {
+            if (user == null) {
                 throw new InvalidDataException("Not found userId = " + req.getUserId());
             }
         }
@@ -101,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
                 .bookingDate(Instant.now())
                 .totalPrice(price)
                 .status(BookingStatus.PENDING)
-                .paymentStatus(Boolean.TRUE.equals(req.getIsCashPayment())? PaymentStatus.CASH : PaymentStatus.UNPAID)
+                .paymentStatus(Boolean.TRUE.equals(req.getIsCashPayment()) ? PaymentStatus.CASH : PaymentStatus.UNPAID)
                 .guestName(req.getGuestName())
                 .guestEmail(req.getGuestEmail())
                 .guestPhone(req.getGuestPhone())
@@ -116,13 +124,13 @@ public class BookingServiceImpl implements BookingService {
                 }).collect(Collectors.joining("##")))
                 .build();
 
-        if(user != null) {
+        if (user != null) {
             booking.setUser(user);
         }
 
         booking = bookingRepo.save(booking);
 
-        if(req.getIsCashPayment())
+        if (req.getIsCashPayment())
             return mapToBookingResponse(booking);
         return vnPayService.createPaymentUrl(booking, baseUrl);
     }
@@ -167,7 +175,7 @@ public class BookingServiceImpl implements BookingService {
             CompletableFuture.runAsync(() -> {
                 try {
                     emailService.sendBookingConfirmationEmail(
-                            user == null? booking.getGuestEmail() : user.getEmail(),
+                            user == null ? booking.getGuestEmail() : user.getEmail(),
                             "Xác nhận đặt tour",
                             emailService.buildBookingConfirmationHtml(
                                     booking.getGuestName(),
@@ -273,9 +281,9 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse mapToBookingResponse(Booking booking) {
         BookingResponse response = BookingResponse.builder()
                 .id(booking.getId())
-                .customerName(booking.getUser() != null? booking.getUser().getFullName() : booking.getGuestName())
-                .customerEmail(booking.getUser() != null? booking.getUser().getEmail() :booking.getGuestEmail())
-                .customerPhone(booking.getUser() != null? booking.getUser().getPhone() :booking.getGuestPhone())
+                .customerName(booking.getUser() != null ? booking.getUser().getFullName() : booking.getGuestName())
+                .customerEmail(booking.getUser() != null ? booking.getUser().getEmail() : booking.getGuestEmail())
+                .customerPhone(booking.getUser() != null ? booking.getUser().getPhone() : booking.getGuestPhone())
                 .totalPrice(booking.getTotalPrice())
                 .status(booking.getStatus().name())
                 .bookingAt(booking.getBookingDate())
@@ -304,7 +312,7 @@ public class BookingServiceImpl implements BookingService {
                 )
                 .build();
 
-        if(booking.getRefund() != null) {
+        if (booking.getRefund() != null) {
             response.setRefund(RefundDto.mapToDto(booking.getRefund()));
         }
         return response;
@@ -332,7 +340,6 @@ public class BookingServiceImpl implements BookingService {
                 .map(this::mapToBookingResponse)
                 .collect(Collectors.toList());
     }
-
 
 
     private String getErrorMessage(String code) {
