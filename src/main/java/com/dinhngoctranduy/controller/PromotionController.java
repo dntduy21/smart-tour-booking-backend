@@ -1,5 +1,6 @@
 package com.dinhngoctranduy.controller;
 
+import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.dto.PromotionRequest;
 import com.dinhngoctranduy.model.dto.PromotionResponse;
 import com.dinhngoctranduy.model.dto.SendPromotionEmailRequest;
@@ -58,21 +59,21 @@ public class PromotionController {
     @PostMapping("/send")
     public ResponseEntity<?> sendPromotionEmail(@RequestBody @Valid SendPromotionEmailRequest request) {
         PromotionResponse promotion = promotionService.getByCode(request.getPromotionCode());
-        if(promotion == null) {
+        if (promotion == null) {
             return ResponseEntity.notFound().build();
         }
         String subject = "Nhận ngay ưu đãi từ chúng tôi: " + promotion.getCode();
 
         String content = """
-            <h3>🎁 Ưu đãi đặc biệt từ DuyTour!</h3>
-            <p><strong>Mã khuyến mãi:</strong> %s</p>
-            <p><strong>Mô tả:</strong> %s</p>
-            <p><strong>Giảm giá:</strong> %.0f%%</p>
-            <p><strong>Thời gian áp dụng:</strong> từ %s đến %s</p>
-            <p>Hãy nhanh tay đặt tour và nhập mã khuyến mãi khi thanh toán!</p>
-            <hr>
-            <p style="font-size:12px;">Đây là email tự động. Vui lòng không phản hồi.</p>
-            """.formatted(
+                <h3>🎁 Ưu đãi đặc biệt từ DuyTour!</h3>
+                <p><strong>Mã khuyến mãi:</strong> %s</p>
+                <p><strong>Mô tả:</strong> %s</p>
+                <p><strong>Giảm giá:</strong> %.0f%%</p>
+                <p><strong>Thời gian áp dụng:</strong> từ %s đến %s</p>
+                <p>Hãy nhanh tay đặt tour và nhập mã khuyến mãi khi thanh toán!</p>
+                <hr>
+                <p style="font-size:12px;">Đây là email tự động. Vui lòng không phản hồi.</p>
+                """.formatted(
                 promotion.getCode(),
                 promotion.getDescription(),
                 promotion.getDiscountPercent(),

@@ -210,6 +210,10 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime startDate = tour.getStartDate();
         Instant startAt = startDate.atZone(ZoneId.systemDefault()).toInstant();
 
+        if (now.isAfter(startAt) || now.equals(startAt)) {
+            throw new InvalidDataException("Không thể hủy đặt tour vì tour đã bắt đầu.");
+        }
+
         long hoursBefore = Duration.between(now, startAt).toHours();
         boolean isHoliday = holidayService.isHoliday(startAt);
 

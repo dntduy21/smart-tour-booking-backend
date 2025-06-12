@@ -13,5 +13,4 @@ public interface PromotionService {
     void delete(Long id);
     PromotionResponse getByCode(String code);
     List<PromotionResponse> searchByDescription(String keyword);
-
 }

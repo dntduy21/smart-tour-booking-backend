@@ -7,10 +7,8 @@ import com.dinhngoctranduy.model.dto.LoginDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResLoginDTO;
 import com.dinhngoctranduy.model.response.ResUserDTO;
-import com.dinhngoctranduy.service.EmailService;
-import com.dinhngoctranduy.service.RoleService;
-import com.dinhngoctranduy.service.UserService;
-import com.dinhngoctranduy.service.VerificationTokenService;
+import com.dinhngoctranduy.service.*;
+import com.dinhngoctranduy.service.impl.PromotionServiceImpl;
 import com.dinhngoctranduy.util.SecurityUtil;
 import com.dinhngoctranduy.util.error.IdInValidException;
 import jakarta.validation.Valid;
@@ -35,6 +33,7 @@ public class AuthController {
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
     private final RoleService roleService;
+    private final PromotionServiceImpl promotionService;
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
                           SecurityUtil securityUtil,
@@ -42,7 +41,8 @@ public class AuthController {
                           PasswordEncoder passwordEncoder,
                           VerificationTokenService verificationTokenService,
                           EmailService emailService,
-                          RoleService roleService) {
+                          RoleService roleService,
+                          PromotionServiceImpl promotionService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
@@ -50,6 +50,7 @@ public class AuthController {
         this.verificationTokenService = verificationTokenService;
         this.emailService = emailService;
         this.roleService = roleService;
+        this.promotionService = promotionService;
     }
 
     @PostMapping("/login")
@@ -115,6 +116,7 @@ public class AuthController {
 
         user.setEmailVerified(true);
         userService.handleUpdateUser(user);
+        promotionService.createAndSendWelcomePromotion(user);
         return ResponseEntity.ok("Email đã được xác thực, bạn có thể đăng nhập.");
     }
 
