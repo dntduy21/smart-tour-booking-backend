@@ -59,9 +59,9 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidDataException("Tour not found with id = " + req.getTourId());
         });
         Instant time = Instant.now();
+
         if (tour.getStartDate() != null) {
             Instant tourStartInstant = tour.getStartDate().atZone(ZoneId.systemDefault()).toInstant();
-
             if (time.isAfter(tourStartInstant) || time.equals(tourStartInstant)) {
                 throw new RuntimeException("Đã quá hạn đặt tour. Không thể đặt tour sau hoặc trong ngày khởi hành.");
             }
@@ -209,6 +209,10 @@ public class BookingServiceImpl implements BookingService {
         Instant now = Instant.now();
         LocalDateTime startDate = tour.getStartDate();
         Instant startAt = startDate.atZone(ZoneId.systemDefault()).toInstant();
+
+        if (now.isAfter(startAt) || now.equals(startAt)) {
+            throw new InvalidDataException("Không thể hủy đặt tour vì tour đã bắt đầu.");
+        }
 
         long hoursBefore = Duration.between(now, startAt).toHours();
         boolean isHoliday = holidayService.isHoliday(startAt);
