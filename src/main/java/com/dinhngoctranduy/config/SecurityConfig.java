@@ -42,7 +42,7 @@ public class SecurityConfig {
                                            CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         String[] whiteList = {
                 "/api/v1/ping",
-                "/api/v1/**",
+//                "/api/v1/**",
                 "/api/v1/login",
                 "/api/v1/register",
                 "/api/v1/verify",
@@ -63,7 +63,7 @@ public class SecurityConfig {
                                 .requestMatchers(whiteList).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/*/export/pdf").permitAll()
-                                .anyRequest().permitAll())
+                                .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .exceptionHandling(
