@@ -18,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CustomTourController {
     private final CustomTourService customTourService;
+
     @PostMapping
     public ResponseEntity<CustomTourResponse> createCustomTour(@RequestBody @Valid CustomTourRequest request) {
         CustomTourResponse response = customTourService.createCustomTour(request);
@@ -26,7 +27,6 @@ public class CustomTourController {
 
     // GET all tours
     @GetMapping
-//    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<List<CustomTourResponse>> getAllCustomTours() {
         return ResponseEntity.ok(customTourService.getAllCustomTours());
     }

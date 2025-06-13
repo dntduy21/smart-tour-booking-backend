@@ -51,6 +51,7 @@ public class SecurityConfig {
                 "/api/v1/tour/custom",
                 "/api/v1/tours/*",
                 "/api/v1/bookings/create",
+                "/api/v1/bookings/search",
                 "/api/v1/bookings/*/cancel",
                 "/api/v1/bookings/vnpay-return",
 
@@ -61,6 +62,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/bookings/{id}").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/*/export/pdf").permitAll()
                                 .anyRequest().authenticated())
