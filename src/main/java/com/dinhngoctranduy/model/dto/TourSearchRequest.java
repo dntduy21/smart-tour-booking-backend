@@ -1,4 +1,5 @@
 package com.dinhngoctranduy.model.dto;// TourSearchRequest.java
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,4 +14,6 @@ public class TourSearchRequest {
     private String location;        // Miền Bắc / Miền Trung / Miền Nam / Quốc tế
     private Long minPrice;          // Giá từ
     private Long maxPrice;          // Giá đến
+    private Integer minRating;
+    private Integer maxRating;
 }

@@ -6,6 +6,7 @@ import com.dinhngoctranduy.model.Review;
 import com.dinhngoctranduy.model.Tour;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.dto.ReviewDTO;
+import com.dinhngoctranduy.model.dto.TourReviewsResponseDTO;
 import com.dinhngoctranduy.repository.ReviewRepository;
 import com.dinhngoctranduy.repository.TourRepository;
 import com.dinhngoctranduy.repository.UserRepository;
@@ -50,10 +51,10 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new InvalidDataException("User not found"));
 
         boolean isCompleted = user.getBookings().stream()
-                        .map(Booking::getTour)
-                                .anyMatch(t -> t.getId().equals(tour.getId()));
+                .map(Booking::getTour)
+                .anyMatch(t -> t.getId().equals(tour.getId()));
 
-        if(!isCompleted) {
+        if (!isCompleted) {
             throw new InvalidDataException("User has not completed the tour");
         }
         review.setTour(tour);
@@ -90,10 +91,24 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<ReviewDTO> getReviewsByTourId(Long tourId) {
-        return reviewRepo.findByTourId(tourId).stream()
-                .map(this::toDto).collect(Collectors.toList());
+    public TourReviewsResponseDTO getReviewsByTourId(Long tourId) {
+        // 1. Lấy danh sách các review chi tiết
+        List<Review> reviews = reviewRepo.findByTourId(tourId);
+        List<ReviewDTO> reviewDTOs = reviews.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        // 2. Lấy điểm rating trung bình từ repository
+        double avgRating = reviewRepo.findAverageRatingByTourId(tourId);
+
+        // 3. Xây dựng và trả về đối tượng response mới
+        return TourReviewsResponseDTO.builder()
+                .averageRating(avgRating)
+                .totalReviews(reviews.size())
+                .reviews(reviewDTOs)
+                .build();
     }
+
 
     @Override
     public List<ReviewDTO> getReviewsByUserId(Long userId) {

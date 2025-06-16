@@ -1,6 +1,7 @@
 package com.dinhngoctranduy.controller;
 
 import com.dinhngoctranduy.model.dto.ReviewDTO;
+import com.dinhngoctranduy.model.dto.TourReviewsResponseDTO;
 import com.dinhngoctranduy.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,7 +36,7 @@ public class ReviewController {
     }
 
     @GetMapping("/tour/{tourId}")
-    public ResponseEntity<List<ReviewDTO>> getByTour(@PathVariable Long tourId) {
+    public ResponseEntity<TourReviewsResponseDTO> getByTour(@PathVariable Long tourId) {
         return ResponseEntity.ok(reviewService.getReviewsByTourId(tourId));
     }
 

@@ -63,6 +63,7 @@ public class SecurityConfig {
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/bookings/{id}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/reviews/tour/{tourId}").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/*/export/pdf").permitAll()
                                 .anyRequest().authenticated())
