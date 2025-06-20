@@ -78,14 +78,28 @@ public class PromotionController {
         String subject = "Nhận ngay ưu đãi từ chúng tôi: " + promotion.getCode();
 
         String content = """
-                <h3>🎁 Ưu đãi đặc biệt từ DuyTour!</h3>
-                <p><strong>Mã khuyến mãi:</strong> %s</p>
-                <p><strong>Mô tả:</strong> %s</p>
-                <p><strong>Giảm giá:</strong> %.0f%%</p>
-                <p><strong>Thời gian áp dụng:</strong> từ %s đến %s</p>
-                <p>Hãy nhanh tay đặt tour và nhập mã khuyến mãi khi thanh toán!</p>
-                <hr>
-                <p style="font-size:12px;">Đây là email tự động. Vui lòng không phản hồi.</p>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                    <div style="text-align: center;">
+                        <h2 style="color: #e63946;">🎉 Ưu Đãi Đặc Biệt Từ <span style="color: #1d3557;">SmartTour</span>!</h2>
+                        <p style="font-size: 16px;">Tận hưởng chuyến đi mơ ước cùng khuyến mãi hấp dẫn!</p>
+                    </div>
+                
+                    <div style="margin-top: 30px;">
+                        <p><strong>🧾 Mã khuyến mãi:</strong> <span style="color: #457b9d; font-weight: bold;">%s</span></p>
+                        <p><strong>📋 Mô tả:</strong> %s</p>
+                        <p><strong>💸 Giảm giá:</strong> <span style="color: #e63946; font-weight: bold;">%.0f%%</span></p>
+                        <p><strong>📅 Thời gian áp dụng:</strong> từ <strong>%s</strong> đến <strong>%s</strong></p>
+                    </div>
+                
+                    <div style="margin-top: 30px; text-align: center;">
+                        <p style="margin-top: 10px;">Nhập mã khuyến mãi khi thanh toán để nhận ưu đãi.</p>
+                    </div>
+                
+                    <hr style="margin-top: 40px;">
+                    <p style="font-size: 12px; color: #888888; text-align: center;">
+                        Đây là email tự động. Vui lòng không phản hồi lại email này.
+                    </p>
+                </div>
                 """.formatted(
                 promotion.getCode(),
                 promotion.getDescription(),

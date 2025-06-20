@@ -33,18 +33,15 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
-    public void handleDeleteUser(Long id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            user.setDeleted(true);
-            userRepository.save(user);
-        } else {
-            throw new RuntimeException("User không tồn tại");
-        }
+    public User handleDeleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        user.setDeleted(true);
+        return userRepository.save(user);
     }
 
-    public void handleBlockUser(Long id) throws UserNotFoundExceptionCustom {
+    public User handleBlockUser(Long id) throws UserNotFoundExceptionCustom {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundExceptionCustom("Không tìm thấy người dùng với ID: " + id));
 
@@ -53,10 +50,10 @@ public class UserService {
         }
 
         user.setBlocked(true);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public void handleUnblockUser(Long id) throws UserNotFoundExceptionCustom {
+    public User handleUnblockUser(Long id) throws UserNotFoundExceptionCustom {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundExceptionCustom("Không tìm thấy người dùng với ID: " + id));
 
@@ -65,7 +62,7 @@ public class UserService {
         }
 
         user.setBlocked(false);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public User fetchUserById(Long id) {

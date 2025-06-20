@@ -4,6 +4,7 @@ import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.dto.ResultPaginationDTO;
 import com.dinhngoctranduy.model.response.ResUpdateUserDTO;
 import com.dinhngoctranduy.model.response.ResUserDTO;
+import com.dinhngoctranduy.model.response.UserStatusResponse;
 import com.dinhngoctranduy.service.RoleService;
 import com.dinhngoctranduy.service.UserService;
 import com.dinhngoctranduy.util.error.IdInValidException;
@@ -31,21 +32,39 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws IdInValidException {
-        this.userService.handleDeleteUser(id);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    public ResponseEntity<UserStatusResponse> deleteUser(@PathVariable Long id) throws IdInValidException {
+        User user = this.userService.handleDeleteUser(id);
+        return ResponseEntity.ok(
+                UserStatusResponse.builder()
+                        .id(user.getId())
+                        .blocked(user.isBlocked())
+                        .deleted(user.isDeleted())
+                        .build()
+        );
     }
 
     @PutMapping("/users/{id}/block")
-    public ResponseEntity<String> blockUser(@PathVariable Long id) throws UserNotFoundExceptionCustom {
-        this.userService.handleBlockUser(id);
-        return ResponseEntity.ok("Người dùng (ID: " + id + ") đã bị chặn thành công.");
+    public ResponseEntity<UserStatusResponse> blockUser(@PathVariable Long id) throws UserNotFoundExceptionCustom {
+        User user = this.userService.handleBlockUser(id);
+        return ResponseEntity.ok(
+                UserStatusResponse.builder()
+                        .id(user.getId())
+                        .blocked(user.isBlocked())
+                        .deleted(user.isDeleted())
+                        .build()
+        );
     }
 
     @PutMapping("/users/{id}/unblock")
-    public ResponseEntity<String> unblockUser(@PathVariable Long id) throws UserNotFoundExceptionCustom {
-        this.userService.handleUnblockUser(id);
-        return ResponseEntity.ok("Người dùng (ID: " + id + ") đã được mở chặn thành công.");
+    public ResponseEntity<UserStatusResponse> unblockUser(@PathVariable Long id) throws UserNotFoundExceptionCustom {
+        User user = this.userService.handleUnblockUser(id);
+        return ResponseEntity.ok(
+                UserStatusResponse.builder()
+                        .id(user.getId())
+                        .blocked(user.isBlocked())
+                        .deleted(user.isDeleted())
+                        .build()
+        );
     }
 
     @GetMapping("/usersbyemail/{keyword}")
