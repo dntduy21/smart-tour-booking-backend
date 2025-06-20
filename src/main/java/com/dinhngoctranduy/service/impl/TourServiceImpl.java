@@ -15,6 +15,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.UnitValue;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -42,7 +43,7 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public TourResponseDTO createTour(TourRequestDTO dto) {
-        if(tourRepository.existsByCode(dto.getCode())) {
+        if (tourRepository.existsByCode(dto.getCode())) {
             throw new InvalidDataException("Tour code already exists");
         }
         Tour tour = toEntity(dto);
@@ -139,7 +140,7 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public List<TourResponseDTO> getAll(Boolean isDeleted) {
-        return (isDeleted != null? tourRepository.findAll() : tourRepository.findAllByDeletedFalse())
+        return (isDeleted != null ? tourRepository.findAll() : tourRepository.findAllByDeletedFalse())
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
@@ -286,7 +287,7 @@ public class TourServiceImpl implements TourService {
             Document document = new Document(pdf);
 
             // Tạo bảng 11 cột (bổ sung itinerary)
-            Table table = new Table(UnitValue.createPercentArray(new float[]{3,5,2,2,2,3,2,3,3,3,4}))
+            Table table = new Table(UnitValue.createPercentArray(new float[]{3, 5, 2, 2, 2, 3, 2, 3, 3, 3, 4}))
                     .useAllAvailableWidth();
 
             // Header
@@ -375,5 +376,13 @@ public class TourServiceImpl implements TourService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         }
+    }
+
+    public Tour updateAvailability(Long tourId, boolean available) {
+        Tour tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tour với ID: " + tourId));
+
+        tour.setAvailable(available);
+        return tourRepository.save(tour);
     }
 }

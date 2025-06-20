@@ -54,8 +54,8 @@ public class TourController {
     }
 
     @GetMapping("/export/pdf")
-    public ResponseEntity<byte[]> exportToursToPdf( @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10000") int size) {
+    public ResponseEntity<byte[]> exportToursToPdf(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10000") int size) {
         byte[] pdfBytes = tourService.exportToursToPdf(page, size);
 
         HttpHeaders headers = new HttpHeaders();
@@ -66,7 +66,6 @@ public class TourController {
 
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
-
 
 
     @GetMapping("/export/excel")
@@ -116,6 +115,15 @@ public class TourController {
         } catch (Exception e) {
             throw new RuntimeException("Failed to export PDF", e);
         }
+    }
+
+    @PatchMapping("/{id}/available")
+    public ResponseEntity<String> updateTourAvailability(
+            @PathVariable Long id,
+            @RequestParam boolean value
+    ) {
+        tourService.updateAvailability(id, value);
+        return ResponseEntity.ok("Cập nhật trạng thái thành công cho tour ID: " + id);
     }
 
 }
