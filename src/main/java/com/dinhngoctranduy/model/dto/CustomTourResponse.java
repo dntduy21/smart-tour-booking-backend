@@ -23,4 +23,5 @@ public class CustomTourResponse {
     private TourRegion region;
     private int adultsCapacity;
     private int childrenCapacity;
+    private boolean status;
 }

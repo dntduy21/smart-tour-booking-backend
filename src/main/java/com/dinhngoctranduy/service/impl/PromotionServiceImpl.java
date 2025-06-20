@@ -8,6 +8,7 @@ import com.dinhngoctranduy.repository.PromotionRepository;
 import com.dinhngoctranduy.service.EmailService;
 import com.dinhngoctranduy.service.PromotionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,8 +27,9 @@ public class PromotionServiceImpl implements PromotionService {
     private final EmailService emailService;
 
     @Override
-    public List<PromotionResponse> getAll() {
-        return promotionRepository.findAll().stream()
+    public List<PromotionResponse> getAll(Pageable pageable) {
+        return promotionRepository.findAll(pageable).getContent()
+                .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -135,30 +137,66 @@ public class PromotionServiceImpl implements PromotionService {
 
                 PromotionRequest welcomeRequest = PromotionRequest.builder()
                         .code(promotionCode)
-                        .description("Ưu đãi đặc biệt dành cho thành viên mới của DuyTour!")
-                        .discountPercent(15.0) // Giảm 15%
+                        .description("Ưu đãi đặc biệt dành cho thành viên mới của SmartTour!")
+                        .discountPercent(15.0)
                         .startAt(Instant.now())
-                        .endAt(Instant.now().plus(7, ChronoUnit.DAYS)) // Hết hạn sau 7 ngày
-                        .usageLimit(1) // Dùng 1 lần
+                        .endAt(Instant.now().plus(7, ChronoUnit.DAYS))
+                        .usageLimit(1)
                         .build();
 
                 this.create(welcomeRequest);
 
-                String subject = "🎁 Quà chào mừng từ DuyTour! Mã khuyến mãi của bạn";
+                String subject = "🎁 Quà chào mừng từ SmartTour! Mã khuyến mãi của bạn";
                 String content = """
-                        <h3>Cảm ơn bạn đã tham gia cùng DuyTour!</h3>
-                        <p>Để chào mừng thành viên mới, chúng tôi xin gửi tặng bạn một mã khuyến mãi đặc biệt:</p>
-                        <p><strong>Mã khuyến mãi:</strong> %s</p>
-                        <p><strong>Mô tả:</strong> %s</p>
-                        <p><strong>Giảm giá:</strong> %.0f%%</p>
-                        <p><strong>Hiệu lực:</strong> Mã có giá trị trong 7 ngày kể từ hôm nay.</p>
-                        <p>Hãy nhanh tay đặt tour và nhập mã khuyến mãi khi thanh toán để nhận ưu đãi nhé!</p>
-                        <hr>
-                        <p style="font-size:12px;">Đây là email tự động. Vui lòng không phản hồi.</p>
+                        <!DOCTYPE html>
+                        <html lang="vi">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <style>
+                                body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+                                .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                                .header { text-align: center; padding: 20px; }
+                                .header img.logo { max-width: 150px; }
+                                .banner img { width: 100%%; height: auto; }
+                                .content-body { padding: 20px 30px; }
+                                .content-body h1 { color: #2c3e50; font-size: 24px; }
+                                .content-body p { color: #34495e; font-size: 16px; line-height: 1.6; }
+                                .promo-box { background-color: #e8f6f3; border: 2px dashed #1abc9c; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+                                .promo-box .code { font-size: 28px; font-weight: bold; color: #16a085; letter-spacing: 2px; }
+                                .promo-box .description { font-size: 14px; color: #34495e; margin-top: 10px; }
+                                .cta-button { display: inline-block; background-color: #3498db; color: #ffffff; padding: 15px 30px; border-radius: 5px; text-decoration: none; font-size: 18px; font-weight: bold; margin-top: 20px; }
+                                .footer { background-color: #2c3e50; color: #ecf0f1; padding: 20px; text-align: center; font-size: 12px; }
+                                .footer p { margin: 5px 0; }
+                                .footer a { color: #3498db; text-decoration: none; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="content-body">
+                                    <h1>Chào mừng bạn đến với SmartTour!</h1>
+                                    <p>Cảm ơn bạn đã tham gia gia nhập website du lịch của chúng tôi. Để khởi đầu cho những hành trình tuyệt vời sắp tới, SmartTour xin gửi tặng bạn một món quà làm quen đặc biệt.</p>
+                        
+                                    <div class="promo-box">
+                                        <p style="margin:0; font-size: 16px; color: #34495e;">Mã khuyến mãi của bạn:</p>
+                                        <p class="code">%s</p>
+                                        <p class="description">Giảm ngay <strong>%.0f%%</strong> cho lần đặt tour đầu tiên. <br>Hiệu lực trong vòng 7 ngày.</p>
+                                    </div>
+                        
+                                    <p>Hãy chọn ngay một điểm đến yêu thích và sử dụng mã ưu đãi khi thanh toán nhé!</p>
+                        
+                                </div>
+                                <div class="footer">
+                                    <p>&copy; %d SmartTour. All rights reserved.</p>
+                                    <p>Bạn nhận được email này vì đã đăng ký tài khoản tại SmartTour.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
                         """.formatted(
                         welcomeRequest.getCode(),
-                        welcomeRequest.getDescription(),
-                        welcomeRequest.getDiscountPercent()
+                        welcomeRequest.getDiscountPercent(),
+                        java.time.Year.now().getValue()
                 );
 
                 emailService.sendHtmlEmail(user.getEmail(), subject, content);
@@ -175,15 +213,14 @@ public class PromotionServiceImpl implements PromotionService {
                 int currentYear = LocalDate.now().getYear();
                 String promotionCode = String.format("BDAY-%d-%d", user.getId(), currentYear);
 
-                // Kiểm tra xem năm nay đã gửi quà cho user này chưa
                 if (promotionRepository.existsByCode(promotionCode)) {
                     return;
                 }
 
                 PromotionRequest birthdayRequest = PromotionRequest.builder()
                         .code(promotionCode)
-                        .description("Quà mừng sinh nhật từ DuyTour! Chúc bạn một tuổi mới nhiều niềm vui và những chuyến đi thú vị.")
-                        .discountPercent(25.0) // Giảm 25%, bạn có thể thay đổi
+                        .description("Quà mừng sinh nhật từ SmartTour! Chúc bạn một tuổi mới nhiều niềm vui và những chuyến đi thú vị.")
+                        .discountPercent(25.0) // Giảm 25%
                         .startAt(Instant.now())
                         .endAt(Instant.now().plus(30, ChronoUnit.DAYS)) // Hạn dùng 30 ngày
                         .usageLimit(1) // Dùng 1 lần
@@ -191,22 +228,60 @@ public class PromotionServiceImpl implements PromotionService {
 
                 this.create(birthdayRequest);
 
-                String subject = "🎂 Chúc mừng sinh nhật! DuyTour gửi tặng bạn món quà đặc biệt";
+                String subject = "🎂 Chúc mừng sinh nhật! SmartTour gửi tặng bạn món quà đặc biệt";
                 String content = """
-                        <h3>Chúc mừng sinh nhật, %s!</h3>
-                        <p>Nhân ngày đặc biệt của bạn, DuyTour xin gửi lời chúc tốt đẹp nhất và một món quà nhỏ để bạn có thêm niềm vui trong những chuyến đi sắp tới:</p>
-                        <p><strong>Mã khuyến mãi:</strong> %s</p>
-                        <p><strong>Ưu đãi:</strong> Giảm ngay %.0f%% cho lần đặt tour tiếp theo.</p>
-                        <p><strong>Mô tả:</strong> %s</p>
-                        <p><strong>Hiệu lực:</strong> Mã có giá trị trong 30 ngày.</p>
-                        <p>Chúc bạn một tuổi mới thật ý nghĩa và có nhiều hành trình đáng nhớ!</p>
-                        <hr>
-                        <p style="font-size:12px;">Đây là email tự động. Vui lòng không phản hồi.</p>
+                        <!DOCTYPE html>
+                        <html lang="vi">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <style>
+                                body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f2f2; }
+                                .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                                .header { text-align: center; padding: 20px; }
+                                .header img.logo { max-width: 150px; }
+                                .banner img { width: 100%%; height: auto; }
+                                .content-body { padding: 20px 30px; }
+                                .content-body h1 { color: #e74c3c; font-size: 26px; text-align: center; }
+                                .content-body p { color: #34495e; font-size: 16px; line-height: 1.6; }
+                                .promo-box { background-color: #fef5e7; border: 2px dashed #f39c12; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+                                .promo-box .code { font-size: 28px; font-weight: bold; color: #d35400; letter-spacing: 2px; }
+                                .promo-box .description { font-size: 14px; color: #34495e; margin-top: 10px; }
+                                .cta-button { display: inline-block; background-color: #e74c3c; color: #ffffff; padding: 15px 30px; border-radius: 5px; text-decoration: none; font-size: 18px; font-weight: bold; margin-top: 20px; }
+                                .footer { background-color: #2c3e50; color: #ecf0f1; padding: 20px; text-align: center; font-size: 12px; }
+                                .footer p { margin: 5px 0; }
+                                .footer a { color: #3498db; text-decoration: none; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="content-body">
+                                    <h1>Chúc Mừng Sinh Nhật, %s!</h1>
+                                    <p>Nhân ngày đặc biệt của bạn, SmartTour xin gửi lời chúc tốt đẹp nhất. Chúc bạn một tuổi mới tràn ngập niềm vui, sức khỏe và có thêm thật nhiều hành trình đáng nhớ!</p>
+                        
+                                    <p>Để góp vui, chúng tôi xin gửi tặng bạn một món quà sinh nhật:</p>
+                        
+                                    <div class="promo-box">
+                                        <p style="margin:0; font-size: 16px; color: #34495e;">Mã ưu đãi đặc biệt:</p>
+                                        <p class="code">%s</p>
+                                        <p class="description">Giảm ngay <strong>%.0f%%</strong> cho một chuyến đi bất kỳ.<br>Mã có hiệu lực trong 30 ngày.</p>
+                                    </div>
+                        
+                                    <p>Hãy tự thưởng cho mình một chuyến đi để khởi đầu một tuổi mới thật rực rỡ nhé!</p>
+                        
+                                </div>
+                                <div class="footer">
+                                    <p>&copy; %d SmartTour. All rights reserved.</p>
+                                    <p>Bạn nhận được email này vì đây là ngày sinh nhật trong hồ sơ tài khoản của bạn tại SmartTour.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
                         """.formatted(
                         user.getFullName() != null ? user.getFullName() : user.getUsername(),
                         birthdayRequest.getCode(),
                         birthdayRequest.getDiscountPercent(),
-                        birthdayRequest.getDescription()
+                        java.time.Year.now().getValue()
                 );
 
                 emailService.sendHtmlEmail(user.getEmail(), subject, content);
@@ -215,5 +290,13 @@ public class PromotionServiceImpl implements PromotionService {
                 e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public List<PromotionResponse> getCustom(Pageable pageable) {
+        return promotionRepository.findNonAutoGeneratedPromotions(pageable).getContent()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 }

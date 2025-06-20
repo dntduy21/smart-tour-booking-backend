@@ -130,8 +130,22 @@ public class BookingServiceImpl implements BookingService {
 
         booking = bookingRepo.save(booking);
 
-        if (req.getIsCashPayment())
+        if (Boolean.TRUE.equals(req.getIsCashPayment())) {
+            try {
+                String subject = "Xác nhận đặt tour và hóa đơn của bạn";
+                String htmlContent = emailService.buildBookingConfirmationHtml(
+                        booking.getGuestName(),
+                        booking.getTour().getTitle() != null ? booking.getTour().getTitle() : booking.getTour().getTitle(),
+                        booking.getId().toString(),
+                        booking.getTotalPrice()
+                );
+                emailService.sendBookingConfirmationEmail(booking.getGuestEmail(), subject, htmlContent);
+            } catch (MessagingException e) {
+                System.err.println("Không thể gửi email xác nhận đặt chỗ cho booking " + booking.getId() + ": " + e.getMessage());
+            }
+
             return mapToBookingResponse(booking);
+        }
         return vnPayService.createPaymentUrl(booking, baseUrl);
     }
 
@@ -265,7 +279,11 @@ public class BookingServiceImpl implements BookingService {
         bookingRepo.save(booking);
 
         CompletableFuture.runAsync(() -> {
-            emailService.sendBookingCancelEmail(booking);
+            try {
+                emailService.sendBookingCancelEmail(booking, booking.getTotalPrice(), penaltyPercent, refundAmount);
+            } catch (Exception e) {
+                System.err.println("Failed to send cancellation email for booking " + booking.getId() + ": " + e.getMessage());
+            }
         });
 
         return new CancelResponse(booking.getId(), total, penaltyPercent, refundAmount);

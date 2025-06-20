@@ -37,6 +37,8 @@ public class CustomTour {
     private String phone;
     private String name;
 
+    private boolean status = false;
+
     // 6. Thời gian (có thể tính tự động)
     @Transient
     public long getDurationDays() {

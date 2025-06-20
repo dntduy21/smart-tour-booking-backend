@@ -8,6 +8,8 @@ import com.dinhngoctranduy.service.CustomTourService;
 import com.dinhngoctranduy.util.SuccessPayload;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +29,13 @@ public class CustomTourController {
 
     // GET all tours
     @GetMapping
-    public ResponseEntity<List<CustomTourResponse>> getAllCustomTours() {
-        return ResponseEntity.ok(customTourService.getAllCustomTours());
+    public ResponseEntity<List<CustomTourResponse>> getAllCustomTours(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<CustomTourResponse> responses = customTourService.getAllCustomTours(pageable);
+        return ResponseEntity.ok(responses);
     }
 
     // GET tour by ID
@@ -43,6 +50,18 @@ public class CustomTourController {
             @RequestBody @Valid CustomTourReplyRequest request) {
         customTourService.sendReplyToCustomer(id, request.getMessage());
         return ResponseEntity.ok(SuccessPayload.build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> softDeleteCustomTour(@PathVariable Long id) {
+        customTourService.softDeleteCustomTour(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<CustomTourResponse> updateCustomTourStatus(@PathVariable Long id, @RequestParam boolean status) {
+        CustomTourResponse response = customTourService.updateCustomTourStatus(id, status);
+        return ResponseEntity.ok(response);
     }
 
 }

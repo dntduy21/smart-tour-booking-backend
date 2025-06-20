@@ -8,6 +8,8 @@ import com.dinhngoctranduy.service.PromotionService;
 import com.dinhngoctranduy.util.SuccessPayload;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,8 +42,21 @@ public class PromotionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PromotionResponse>> getAll() {
-        return ResponseEntity.ok(promotionService.getAll());
+    public ResponseEntity<List<PromotionResponse>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10000") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<PromotionResponse> responses = promotionService.getAll(pageable);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/custom")
+    public ResponseEntity<List<PromotionResponse>> getAllCustomPromotions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10000") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<PromotionResponse> responses = promotionService.getCustom(pageable);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
@@ -53,7 +68,6 @@ public class PromotionController {
     public List<PromotionResponse> searchPromotions(@RequestParam String keyword) {
         return promotionService.searchByDescription(keyword);
     }
-
 
     @PostMapping("/send")
     public ResponseEntity<?> sendPromotionEmail(@RequestBody @Valid SendPromotionEmailRequest request) {

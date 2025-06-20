@@ -11,8 +11,11 @@ import com.dinhngoctranduy.service.*;
 import com.dinhngoctranduy.service.impl.PromotionServiceImpl;
 import com.dinhngoctranduy.util.SecurityUtil;
 import com.dinhngoctranduy.util.error.IdInValidException;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -77,7 +80,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User user) throws IdInValidException {
+    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User user) throws IdInValidException, MessagingException {
         if (userService.isUsernameExists(user.getUsername())) {
             throw new IdInValidException("Username đã tồn tại");
         }
@@ -104,20 +107,80 @@ public class AuthController {
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         Optional<VerificationToken> optionalToken = verificationTokenService.findByToken(token);
+
         if (optionalToken.isEmpty()) {
-            return ResponseEntity.badRequest().body("Token không hợp lệ hoặc đã hết hạn.");
+            String htmlBody = generateStaticPageHtml(
+                    "Xác thực Thất Bại",
+                    "Token không hợp lệ hoặc đã hết hạn.",
+                    "Vui lòng đóng trang này và thử lại.",
+                    "#dc3545"
+            );
+            return createHtmlResponse(htmlBody, 400);
         }
 
         VerificationToken verificationToken = optionalToken.get();
         User user = verificationToken.getUser();
+
         if (user == null) {
-            return ResponseEntity.badRequest().body("Token không hợp lệ.");
+            String htmlBody = generateStaticPageHtml(
+                    "Xác thực Thất Bại",
+                    "Token không hợp lệ.",
+                    "Liên kết này không được liên kết với bất kỳ người dùng nào.",
+                    "#dc3545"
+            );
+            return createHtmlResponse(htmlBody, 400);
         }
 
         user.setEmailVerified(true);
         userService.handleUpdateUser(user);
         promotionService.createAndSendWelcomePromotion(user);
-        return ResponseEntity.ok("Email đã được xác thực, bạn có thể đăng nhập.");
+
+        String htmlBody = generateStaticPageHtml(
+                "Xác thực Thành Công!",
+                "Email đã được xác thực thành công.",
+                "Bây giờ bạn có thể đóng trang này và đăng nhập vào ứng dụng.",
+                "#28a745"
+        );
+        return createHtmlResponse(htmlBody, 200);
+    }
+
+    private ResponseEntity<String> createHtmlResponse(String htmlBody, int statusCode) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_HTML);
+        return new ResponseEntity<>(htmlBody, headers, statusCode);
+    }
+
+    private String generateStaticPageHtml(String title, String message, String details, String headerColor) {
+        return """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>%s</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                        .container { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); text-align: center; max-width: 450px; overflow: hidden; }
+                        .header { background-color: %s; color: white; padding: 30px 20px; }
+                        .header h1 { margin: 0; font-size: 28px; }
+                        .content { padding: 30px 40px; color: #333; }
+                        .content p { font-size: 16px; color: #666; line-height: 1.6; }
+                        .content .message { font-size: 18px; font-weight: 500; color: #333; margin-bottom: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>%s</h1>
+                        </div>
+                        <div class="content">
+                            <p class="message">%s</p>
+                            <p>%s</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(title, headerColor, title, message, details);
     }
 
     @GetMapping("/account")

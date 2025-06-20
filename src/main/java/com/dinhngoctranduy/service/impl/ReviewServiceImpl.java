@@ -12,6 +12,7 @@ import com.dinhngoctranduy.repository.TourRepository;
 import com.dinhngoctranduy.repository.UserRepository;
 import com.dinhngoctranduy.service.ReviewService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -111,9 +112,11 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public List<ReviewDTO> getReviewsByUserId(Long userId) {
-        return reviewRepo.findByUserId(userId).stream()
-                .map(this::toDto).collect(Collectors.toList());
+    public List<ReviewDTO> getReviewsByUserId(Long userId, Pageable pageable) {
+        return reviewRepo.findByUserId(userId, pageable).getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     private ReviewDTO toDto(Review review) {

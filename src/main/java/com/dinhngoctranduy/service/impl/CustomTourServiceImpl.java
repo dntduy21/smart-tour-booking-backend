@@ -6,6 +6,7 @@ import com.dinhngoctranduy.repository.CustomTourRepository;
 import com.dinhngoctranduy.service.CustomTourService;
 import com.dinhngoctranduy.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class CustomTourServiceImpl implements CustomTourService {
                 .region(request.getRegion())
                 .adultsCapacity(request.getAdultsCapacity())
                 .childrenCapacity(request.getChildrenCapacity())
+                .status(false)
                 .deleted(false)
                 .build();
 
@@ -40,8 +42,9 @@ public class CustomTourServiceImpl implements CustomTourService {
         return mapToResponse(saved);
     }
 
-    public List<CustomTourResponse> getAllCustomTours() {
-        return customTourRepository.findAll()
+    public List<CustomTourResponse> getAllCustomTours(Pageable pageable) {
+        return customTourRepository.findByDeletedFalse(pageable)
+                .getContent()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -109,8 +112,24 @@ public class CustomTourServiceImpl implements CustomTourService {
                 .region(tour.getRegion())
                 .durationDays(tour.getDurationDays())
                 .durationNights(tour.getDurationNights())
-                .adultsCapacity(tour.getAdultsCapacity())
-                .childrenCapacity(tour.getChildrenCapacity())
+                .status(tour.isStatus())
                 .build();
+    }
+
+    public void softDeleteCustomTour(Long id) {
+        CustomTour tour = customTourRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Custom Tour not found with id: " + id));
+
+        tour.setDeleted(true);
+        customTourRepository.save(tour);
+    }
+
+    public CustomTourResponse updateCustomTourStatus(Long id, boolean newStatus) {
+        CustomTour tour = customTourRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Custom Tour not found with id: " + id));
+
+        tour.setStatus(newStatus);
+        CustomTour updatedTour = customTourRepository.save(tour);
+        return mapToResponse(updatedTour);
     }
 }

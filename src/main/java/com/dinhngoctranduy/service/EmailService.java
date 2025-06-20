@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -21,16 +22,108 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendVerificationEmail(User user, String token) {
-        String subject = "Xác thực tài khoản của bạn";
-        String confirmationUrl = "http://localhost:8080/api/v1/verify?token=" + token;
-        String message = "Click vào link sau để xác thực email: " + confirmationUrl;
+    public void sendVerificationEmail(User user, String token) throws MessagingException {
+        final String APP_NAME = "SmartTour";
+        final String subject = "Xác thực tài khoản của bạn - " + APP_NAME;
+        final String confirmationUrl = "http://localhost:8080/api/v1/verify?token=" + token;
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(user.getEmail());
-        email.setSubject(subject);
-        email.setText(message);
-        mailSender.send(email);
+        final String htmlContent = buildVerificationEmailHtml(user.getUsername(), confirmationUrl, APP_NAME);
+
+        final MimeMessage message = mailSender.createMimeMessage();
+        final MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(user.getEmail());
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true);
+
+        mailSender.send(message);
+    }
+
+    private String buildVerificationEmailHtml(String username, String confirmationUrl, String appName) {
+        return """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Xác thực tài khoản của bạn</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            background-color: #f4f4f4;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background: #fff;
+                            padding: 30px;
+                            border-radius: 8px;
+                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            text-align: center;
+                            padding-bottom: 20px;
+                            border-bottom: 1px solid #eee;
+                        }
+                        .header h1 {
+                            color: #0056b3;
+                            margin: 0;
+                        }
+                        .content {
+                            padding: 20px 0;
+                        }
+                        .button {
+                            display: inline-block;
+                            background-color: #007bff;
+                            color: #ffffff !important;
+                            padding: 12px 25px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-weight: bold;
+                            margin-top: 20px;
+                        }
+                        .footer {
+                            text-align: center;
+                            padding-top: 20px;
+                            border-top: 1px solid #eee;
+                            font-size: 0.9em;
+                            color: #777;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Xác thực tài khoản</h1>
+                        </div>
+                        <div class="content">
+                            <p>Xin chào <strong>%s</strong>,</p>
+                            <p>Cảm ơn bạn đã đăng ký! Để hoàn tất quá trình tạo tài khoản, vui lòng xác thực địa chỉ email của bạn bằng cách nhấn vào nút dưới đây:</p>
+                            <p style="text-align: center;">
+                                <a href="%s" class="button">Xác thực Email của bạn</a>
+                            </p>
+                            <p>Nếu nút trên không hoạt động, bạn có thể sao chép và dán liên kết sau vào trình duyệt của mình:</p>
+                            <p><a href="%s">%s</a></p>
+                            <p>Trân trọng,</p>
+                            <p>Đội ngũ %s</p>
+                        </div>
+                        <div class="footer">
+                            <p>&copy; %d %s. Tất cả quyền được bảo lưu.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(
+                username,
+                confirmationUrl,
+                confirmationUrl, confirmationUrl,
+                appName,
+                java.time.Year.now().getValue(), appName
+        );
     }
 
     public void sendBookingConfirmationEmail(String toEmail, String subject, String htmlContent) throws MessagingException {
@@ -39,42 +132,135 @@ public class EmailService {
 
         helper.setTo(toEmail);
         helper.setSubject(subject);
-        helper.setText(htmlContent, true); // true = send HTML
+        helper.setText(htmlContent, true);
 
         mailSender.send(message);
     }
 
     public String buildBookingConfirmationHtml(String guestName, String tourTitle, String bookingId, double price) {
+        DecimalFormat formatter = new DecimalFormat("#,###");
+
         return """
-                <html>
+                <!DOCTYPE html>
+                <html lang="vi">
                 <head>
                     <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Xác nhận Đặt tour - TourVN</title>
                     <style>
-                        body { font-family: Arial, sans-serif; }
-                        .header { background-color: #f2f2f2; padding: 10px; }
-                        .content { margin-top: 20px; }
-                        .footer { margin-top: 30px; font-size: 13px; color: gray; }
+                        body {
+                            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            background-color: #f4f4f4;
+                            color: #333;
+                        }
+                        .container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #007bff; /* Màu xanh dương chủ đạo */
+                            color: #ffffff;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        .header h1 {
+                            margin: 0;
+                            font-size: 28px;
+                        }
+                        .content {
+                            padding: 25px;
+                            line-height: 1.6;
+                            font-size: 16px;
+                        }
+                        .content p {
+                            margin-bottom: 10px;
+                        }
+                        .highlight {
+                            background-color: #e6f2ff; /* Màu nền nhẹ cho thông tin quan trọng */
+                            border-left: 5px solid #007bff;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 4px;
+                        }
+                        .highlight strong {
+                            color: #0056b3; /* Màu đậm hơn cho tiêu đề trong highlight */
+                        }
+                        .button-container {
+                            text-align: center;
+                            margin-top: 30px;
+                            margin-bottom: 20px;
+                        }
+                        .button {
+                            display: inline-block;
+                            background-color: #28a745; /* Màu xanh lá cây cho nút */
+                            color: #ffffff;
+                            padding: 12px 25px;
+                            border-radius: 5px;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+                        .footer {
+                            background-color: #f2f2f2;
+                            color: #777;
+                            padding: 20px;
+                            text-align: center;
+                            font-size: 13px;
+                            border-top: 1px solid #eee;
+                        }
+                        .footer p {
+                            margin: 5px 0;
+                        }
+                        .tour-info {
+                            list-style: none;
+                            padding: 0;
+                            margin: 15px 0;
+                        }
+                        .tour-info li {
+                            margin-bottom: 8px;
+                        }
+                        .tour-info strong {
+                            display: inline-block;
+                            width: 120px; /* Căn chỉnh các nhãn */
+                        }
                     </style>
                 </head>
                 <body>
-                    <div class="header">
-                        <h2>Chào %s,</h2>
-                    </div>
-                    <div class="content">
-                        <p>Bạn đã đặt tour thành công 🎉</p>
-                        <p><strong>Tên tour:</strong> %s</p>
-                        <p><strong>Mã đơn hàng:</strong> %s</p>
-                        <p><strong>Tổng số tiền:</strong> %, .0f VND</p>
-                        <br>
-                        <p>Chúng tôi sẽ liên hệ bạn sớm để xác nhận thông tin chi tiết.</p>
-                    </div>
-                    <div class="footer">
-                        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
-                        <p>— Đội ngũ hỗ trợ TourVN</p>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Xác nhận Đặt Tour</h1>
+                        </div>
+                        <div class="content">
+                            <p>Xin chào <strong>%s</strong>,</p>
+                            <p>Cảm ơn bạn đã đặt tour với chúng tôi! Chúng tôi rất vui được xác nhận rằng đơn đặt tour của bạn đã thành công 🎉.</p>
+                
+                            <div class="highlight">
+                                <p><strong>Chi tiết Đặt Tour của bạn:</strong></p>
+                                <ul class="tour-info">
+                                    <li><strong>Tên Tour:</strong> %s</li>
+                                    <li><strong>Mã Đơn hàng:</strong> %s</li>
+                                    <li><strong>Tổng Số tiền:</strong> %s VND</li>
+                                </ul>
+                            </div>
+                
+                            <p>Chúng tôi sẽ sớm liên hệ với bạn để xác nhận lại thông tin chi tiết và chuẩn bị cho chuyến đi của bạn.</p>
+                            <p>Nếu bạn có bất kỳ câu hỏi nào, xin đừng ngần ngại liên hệ với chúng tôi.</p>
+                
+                        </div>
+                        <div class="footer">
+                            <p>Trân trọng,</p>
+                            <p>Đội ngũ hỗ trợ SmartTour</p>
+                            <p>Bản quyền &copy; %s TourVN. All rights reserved.</p>
+                        </div>
                     </div>
                 </body>
                 </html>
-                """.formatted(guestName, tourTitle, bookingId, price);
+                """.formatted(guestName, tourTitle, bookingId, formatter.format(price), java.time.Year.now().getValue());
     }
 
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
@@ -90,27 +276,147 @@ public class EmailService {
         }
     }
 
-    public void sendBookingCancelEmail(Booking booking) {
+    public void sendBookingCancelEmail(Booking booking, double originalAmount, double penaltyPercent, double refundAmount) {
         String to = booking.getEmail();
+        String subject = "Thông báo Hủy Tour Thành Công và Chi tiết Hoàn Tiền";
 
-        String subject = "Thông báo hủy tour thành công";
+        // Use DecimalFormat for currency formatting
+        DecimalFormat currencyFormatter = new DecimalFormat("#,###");
+        // Use DecimalFormat for percentage formatting, if needed more precisely than String.format
+        DecimalFormat percentFormatter = new DecimalFormat("#.#");
 
         String bookingTime = formatInstantToReadable(booking.getBookingDate());
         String cancelTime = formatInstantToReadable(Instant.now());
 
-        String content = "<html><body>"
-                + "<h3>Xin chào " + booking.getUserName() + ",</h3>"
-                + "<p>Tour <b>" + booking.getTour().getTitle() + "</b> của bạn đã được hủy thành công.</p>"
-                + "<p>Thông tin chi tiết:</p>"
-                + "<ul>"
-                + "<li>Ngày đặt tour: " + bookingTime + "</li>"
-                + "<li>Ngày hủy: " + cancelTime + "</li>"
-                + "<li>Tổng tiền: " + String.format("%,.0f", booking.getTotalPrice()) + " VND</li>"
-                + "</ul>"
-                + "<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>"
-                + "</body></html>";
+        String htmlContent = """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Hủy Tour Thành Công - TourVN</title>
+                    <style>
+                        body {
+                            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            background-color: #f4f4f4;
+                            color: #333;
+                        }
+                        .container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #dc3545; /* Màu đỏ cho hủy tour */
+                            color: #ffffff;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        .header h1 {
+                            margin: 0;
+                            font-size: 28px;
+                        }
+                        .content {
+                            padding: 25px;
+                            line-height: 1.6;
+                            font-size: 16px;
+                        }
+                        .content p {
+                            margin-bottom: 10px;
+                        }
+                        .info-block {
+                            background-color: #ffe6e6; /* Nền nhẹ cho thông tin hủy */
+                            border-left: 5px solid #dc3545;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 4px;
+                        }
+                        .info-block strong {
+                            color: #a71d2a;
+                        }
+                        .detail-list {
+                            list-style: none;
+                            padding: 0;
+                            margin: 15px 0;
+                        }
+                        .detail-list li {
+                            margin-bottom: 8px;
+                        }
+                        .detail-list strong {
+                            display: inline-block;
+                            width: 150px; /* Căn chỉnh các nhãn */
+                        }
+                        .footer {
+                            background-color: #f2f2f2;
+                            color: #777;
+                            padding: 20px;
+                            text-align: center;
+                            font-size: 13px;
+                            border-top: 1px solid #eee;
+                        }
+                        .footer p {
+                            margin: 5px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Xác nhận Hủy Tour</h1>
+                        </div>
+                        <div class="content">
+                            <p>Xin chào <strong>%s</strong>,</p>
+                            <p>Chúng tôi xác nhận rằng tour <b>%s</b> của bạn (mã đơn hàng: %s) đã được hủy thành công.</p>
+                            <p>Chúng tôi rất tiếc khi bạn phải hủy chuyến đi này.</p>
+                
+                            <div class="info-block">
+                                <p><strong>Chi tiết Đơn hàng:</strong></p>
+                                <ul class="detail-list">
+                                    <li><strong>Mã Đơn hàng:</strong> %s</li>
+                                    <li><strong>Ngày Đặt Tour:</strong> %s</li>
+                                    <li><strong>Ngày Hủy:</strong> %s</li>
+                                    <li><strong>Tổng Tiền Ban Đầu:</strong> %s VND</li>
+                                </ul>
+                            </div>
+                
+                            <div class="info-block">
+                                <p><strong>Chi tiết Hoàn Tiền:</strong></p>
+                                <ul class="detail-list">
+                                    <li><strong>Phí Hủy Tour:</strong> %s%%</li>
+                                    <li><strong>Số Tiền Hoàn Lại Dự Kiến:</strong> %s VND</li>
+                                </ul>
+                                <p>Số tiền hoàn lại sẽ được xử lý trong vòng <strong>3 ngày làm việc</strong> và sẽ được chuyển về phương thức thanh toán ban đầu của bạn.</p>
+                            </div>
+                
+                            <p>Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ thêm, vui lòng liên hệ với bộ phận hỗ trợ khách hàng của chúng tôi.</p>
+                        </div>
+                        <div class="footer">
+                            <p>Trân trọng,</p>
+                            <p>Đội ngũ hỗ trợ SmartTour</p>
+                            <p>Bản quyền &copy; %s SmartTour. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(
+                booking.getUserName(),
+                booking.getTour().getTitle(),
+                booking.getId(),
+                booking.getId(),
+                bookingTime,
+                cancelTime,
+                currencyFormatter.format(originalAmount),
+                percentFormatter.format(penaltyPercent),
+                currencyFormatter.format(refundAmount),
+                java.time.Year.now().getValue()
+        );
 
-        sendHtmlEmail(to, subject, content);
+        sendHtmlEmail(to, subject, htmlContent);
     }
 
     public String formatInstantToReadable(Instant instant) {
@@ -118,6 +424,4 @@ public class EmailService {
                 .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));  // múi giờ VN
         return formatter.format(instant);
     }
-
-
 }

@@ -23,13 +23,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1")
 public class UserController {
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder
-            , RoleService roleService) {
+    public UserController(UserService userService, RoleService roleService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
     }
 
@@ -80,8 +77,6 @@ public class UserController {
 
     @PutMapping("/users")
     public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User user) {
-        String hashPassword = this.passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashPassword);
         User userUpdate = this.userService.handleUpdateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(userService.resUpdateUserDTO(userUpdate));
     }

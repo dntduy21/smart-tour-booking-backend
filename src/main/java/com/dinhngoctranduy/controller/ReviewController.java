@@ -3,6 +3,8 @@ package com.dinhngoctranduy.controller;
 import com.dinhngoctranduy.model.dto.ReviewDTO;
 import com.dinhngoctranduy.model.dto.TourReviewsResponseDTO;
 import com.dinhngoctranduy.service.ReviewService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +43,12 @@ public class ReviewController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReviewDTO>> getByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(reviewService.getReviewsByUserId(userId));
+    public ResponseEntity<List<ReviewDTO>> getByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(reviewService.getReviewsByUserId(userId, pageable));
     }
 }

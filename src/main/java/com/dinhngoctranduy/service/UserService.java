@@ -12,6 +12,7 @@ import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User handleCreateUser(User user) {
@@ -121,18 +124,39 @@ public class UserService {
 
     public User handleUpdateUser(User reqUser) {
         User userCurrent = this.fetchUserById(reqUser.getId());
-        if (userCurrent != null) {
-            userCurrent.setFullName(reqUser.getFullName());
-            userCurrent.setPassword(reqUser.getPassword());
-            userCurrent.setAddress(reqUser.getAddress());
-            userCurrent.setPhone(reqUser.getPhone());
-            userCurrent.setBirthDate(reqUser.getBirthDate());
-            userCurrent.setGender(reqUser.getGender());
-
-            userCurrent = this.userRepository.save(userCurrent);
+        if (userCurrent == null) {
+            throw new RuntimeException("User not found");
         }
-        return userCurrent;
+
+        // Chỉ cập nhật nếu field != null
+        if (reqUser.getFullName() != null) {
+            userCurrent.setFullName(reqUser.getFullName());
+        }
+
+        if (reqUser.getPassword() != null) {
+            String hashed = passwordEncoder.encode(reqUser.getPassword());
+            userCurrent.setPassword(hashed);
+        }
+
+        if (reqUser.getAddress() != null) {
+            userCurrent.setAddress(reqUser.getAddress());
+        }
+
+        if (reqUser.getPhone() != null) {
+            userCurrent.setPhone(reqUser.getPhone());
+        }
+
+        if (reqUser.getBirthDate() != null) {
+            userCurrent.setBirthDate(reqUser.getBirthDate());
+        }
+
+        if (reqUser.getGender() != null) {
+            userCurrent.setGender(reqUser.getGender());
+        }
+
+        return userRepository.save(userCurrent);
     }
+
 
     public User handleGetUserByUsername(String username) {
         return this.userRepository.findByUsername(username);
