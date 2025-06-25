@@ -11,5 +11,4 @@ public class Participant {
     private String name;
     private String phone;
     private String gender; // male, female
-
 }

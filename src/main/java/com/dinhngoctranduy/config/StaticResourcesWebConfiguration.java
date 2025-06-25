@@ -25,7 +25,6 @@ public class StaticResourcesWebConfiguration implements WebMvcConfigurer {
 
     private void createDirectoryIfNotExists(String path) {
         try {
-            // Nếu là "file:/C:/upload" → ta cần loại bỏ "file:" để lấy path thực
             String directoryPath = path.replaceFirst("^file:(//)?", "");
 
             File dir = new File(directoryPath);

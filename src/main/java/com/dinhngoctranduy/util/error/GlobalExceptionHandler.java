@@ -1,9 +1,6 @@
-package com.dinhngoctranduy.exceptions.handler;
+package com.dinhngoctranduy.util.error;
 
-import com.dinhngoctranduy.exceptions.InvalidDataException;
 import com.dinhngoctranduy.model.response.RestResponse;
-import com.dinhngoctranduy.util.error.IdInValidException;
-import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,7 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice

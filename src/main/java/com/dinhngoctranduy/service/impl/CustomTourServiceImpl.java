@@ -1,7 +1,8 @@
 package com.dinhngoctranduy.service.impl;
 
 import com.dinhngoctranduy.model.CustomTour;
-import com.dinhngoctranduy.model.dto.CustomTourResponse;
+import com.dinhngoctranduy.model.request.CustomTourRequest;
+import com.dinhngoctranduy.model.response.CustomTourResponse;
 import com.dinhngoctranduy.repository.CustomTourRepository;
 import com.dinhngoctranduy.service.CustomTourService;
 import com.dinhngoctranduy.service.EmailService;
@@ -20,7 +21,7 @@ public class CustomTourServiceImpl implements CustomTourService {
     private final CustomTourRepository customTourRepository;
     private final EmailService emailService;
 
-    public CustomTourResponse createCustomTour(com.dinhngoctranduy.model.dto.CustomTourRequest request) {
+    public CustomTourResponse createCustomTour(CustomTourRequest request) {
         CustomTour tour = CustomTour.builder()
                 .name(request.getName())
                 .email(request.getEmail())
@@ -60,7 +61,7 @@ public class CustomTourServiceImpl implements CustomTourService {
         CustomTour tour = customTourRepository.findByIdAndDeletedFalse(tourId)
                 .orElseThrow(() -> new RuntimeException("Custom tour not found with id: " + tourId));
 
-        String subject = "Phản hồi từ TourVN về yêu cầu đặt tour của bạn";
+        String subject = "Phản hồi từ SmartTour về yêu cầu đặt tour của bạn";
 
         String htmlContent = buildCustomTourReplyHtml(tour.getName(), message);
 
@@ -88,7 +89,7 @@ public class CustomTourServiceImpl implements CustomTourService {
                     </div>
                     <div class="footer">
                         <p>Trân trọng,</p>
-                        <p><b>Đội ngũ hỗ trợ TourVN</b></p>
+                        <p><b>Đội ngũ hỗ trợ SmartTour</b></p>
                     </div>
                 </body>
                 </html>

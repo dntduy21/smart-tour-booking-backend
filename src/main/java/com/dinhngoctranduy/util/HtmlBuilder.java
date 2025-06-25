@@ -1,10 +1,9 @@
 package com.dinhngoctranduy.util;
 
 import com.dinhngoctranduy.model.dto.ImageDTO;
-import com.dinhngoctranduy.model.dto.TourResponseDTO;
+import com.dinhngoctranduy.model.response.TourResponseDTO;
 import org.apache.commons.text.StringEscapeUtils;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class HtmlBuilder {

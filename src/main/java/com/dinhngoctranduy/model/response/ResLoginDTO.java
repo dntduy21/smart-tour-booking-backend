@@ -1,6 +1,5 @@
 package com.dinhngoctranduy.model.response;
 
-import com.dinhngoctranduy.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

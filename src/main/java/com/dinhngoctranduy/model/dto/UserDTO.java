@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Data
-public class UserDto {
+public class UserDTO {
     private String fullName;
     private String gender;
     private String email;

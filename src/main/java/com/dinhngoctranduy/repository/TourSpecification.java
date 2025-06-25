@@ -1,7 +1,7 @@
 package com.dinhngoctranduy.repository;// TourSpecification.java
 import com.dinhngoctranduy.model.Review;
 import com.dinhngoctranduy.model.Tour;
-import com.dinhngoctranduy.model.dto.TourSearchRequest;
+import com.dinhngoctranduy.model.request.TourSearchRequest;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;

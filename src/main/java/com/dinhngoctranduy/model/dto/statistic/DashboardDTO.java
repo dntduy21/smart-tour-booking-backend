@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DashboardDto {
+public class DashboardDTO {
     private Long totalBookings;        // Tổng số đơn đặt
     private Double totalRevenue;       // Tổng doanh thu
     private Long activeTours;          // Số tour đang hoạt động (available = true)

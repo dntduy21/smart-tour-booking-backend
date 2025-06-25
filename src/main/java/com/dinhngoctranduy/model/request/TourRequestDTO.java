@@ -1,4 +1,4 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.request;
 
 import com.dinhngoctranduy.util.constant.TourCategory;
 import com.dinhngoctranduy.util.constant.TourRegion;

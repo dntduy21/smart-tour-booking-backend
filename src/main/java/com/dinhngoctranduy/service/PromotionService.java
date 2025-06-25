@@ -1,7 +1,7 @@
 package com.dinhngoctranduy.service;
 
-import com.dinhngoctranduy.model.dto.PromotionRequest;
-import com.dinhngoctranduy.model.dto.PromotionResponse;
+import com.dinhngoctranduy.model.request.PromotionRequest;
+import com.dinhngoctranduy.model.response.PromotionResponse;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

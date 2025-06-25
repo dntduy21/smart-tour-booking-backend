@@ -2,13 +2,12 @@ package com.dinhngoctranduy.service;
 
 
 import com.dinhngoctranduy.model.Tour;
-import com.dinhngoctranduy.model.dto.TourRequestDTO;
-import com.dinhngoctranduy.model.dto.TourResponseDTO;
-import com.dinhngoctranduy.model.dto.TourSearchRequest;
+import com.dinhngoctranduy.model.request.TourRequestDTO;
+import com.dinhngoctranduy.model.response.TourResponseDTO;
+import com.dinhngoctranduy.model.request.TourSearchRequest;
 import org.springframework.data.domain.Page;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 

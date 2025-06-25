@@ -20,9 +20,7 @@ public class Checkout {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private PaymentGateway method;     // VNPAY, MOMO, BANK_TRANSFER,…
-
-    private String orderInfo;          // ghi chú đơn
+    private PaymentGateway method;     // VNPAY
 
     private Instant paidAt;
     private double amount;
@@ -37,7 +35,6 @@ public class Checkout {
     private String responseCode;
     private String errorMessage;
     private String bankCode;
-    private String qrCodeUrl;          // nếu là MoMo QR
 
     @Lob
     private String callbackData;       // toàn bộ payload

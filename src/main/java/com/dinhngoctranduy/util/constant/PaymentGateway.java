@@ -1,3 +1,3 @@
 package com.dinhngoctranduy.util.constant;
 
-public enum PaymentGateway {VNPAY, MOMO}
+public enum PaymentGateway {VNPAY}

@@ -1,4 +1,4 @@
-package com.dinhngoctranduy.model.dto;// TourSearchRequest.java
+package com.dinhngoctranduy.model.request;// TourSearchRequest.java
 
 import lombok.Getter;
 import lombok.Setter;

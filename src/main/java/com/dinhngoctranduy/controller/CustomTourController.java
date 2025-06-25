@@ -1,9 +1,9 @@
 package com.dinhngoctranduy.controller;
 
 
-import com.dinhngoctranduy.model.dto.CustomTourReplyRequest;
-import com.dinhngoctranduy.model.dto.CustomTourRequest;
-import com.dinhngoctranduy.model.dto.CustomTourResponse;
+import com.dinhngoctranduy.model.request.CustomTourReplyRequest;
+import com.dinhngoctranduy.model.request.CustomTourRequest;
+import com.dinhngoctranduy.model.response.CustomTourResponse;
 import com.dinhngoctranduy.service.CustomTourService;
 import com.dinhngoctranduy.util.SuccessPayload;
 import jakarta.validation.Valid;

@@ -1,6 +1,8 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.response;
 
 import com.dinhngoctranduy.model.Participant;
+import com.dinhngoctranduy.model.dto.PromotionDTO;
+import com.dinhngoctranduy.model.dto.RefundDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -30,9 +32,9 @@ public class BookingResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Instant cancelAt;
 
-    private PromotionDto promotionDto;
+    private PromotionDTO promotionDto;
     private List<Participant> participants;
-    private RefundDto refund;
+    private RefundDTO refund;
 
     @Getter
     @Setter

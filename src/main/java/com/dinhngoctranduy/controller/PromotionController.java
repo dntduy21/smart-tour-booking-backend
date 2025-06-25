@@ -1,8 +1,8 @@
 package com.dinhngoctranduy.controller;
 
-import com.dinhngoctranduy.model.dto.PromotionRequest;
-import com.dinhngoctranduy.model.dto.PromotionResponse;
-import com.dinhngoctranduy.model.dto.SendPromotionEmailRequest;
+import com.dinhngoctranduy.model.request.PromotionRequest;
+import com.dinhngoctranduy.model.response.PromotionResponse;
+import com.dinhngoctranduy.model.request.SendPromotionEmailRequest;
 import com.dinhngoctranduy.service.EmailService;
 import com.dinhngoctranduy.service.PromotionService;
 import com.dinhngoctranduy.util.SuccessPayload;

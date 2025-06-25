@@ -1,6 +1,10 @@
 package com.dinhngoctranduy.controller;
 
 import com.dinhngoctranduy.model.dto.*;
+import com.dinhngoctranduy.model.request.BookingRequest;
+import com.dinhngoctranduy.model.request.UpdateRefundStatusRequest;
+import com.dinhngoctranduy.model.response.BookingResponse;
+import com.dinhngoctranduy.model.response.CancelResponse;
 import com.dinhngoctranduy.service.impl.BookingServiceImpl;
 import com.dinhngoctranduy.service.impl.RefundService;
 import com.dinhngoctranduy.util.SuccessPayload;
@@ -87,7 +91,7 @@ public class BookingController {
     @PutMapping("/{bookingId}/update-refund-status")
     public ResponseEntity<?> updateRefundStatusByBooking(@PathVariable Long bookingId,
                                                  @RequestBody UpdateRefundStatusRequest request) {
-        RefundDto updatedRefund = refundService.updateRefundStatusByBookingId(bookingId, request.getStatus());
+        RefundDTO updatedRefund = refundService.updateRefundStatusByBookingId(bookingId, request.getStatus());
         return ResponseEntity.ok(updatedRefund);
     }
 

@@ -1,5 +1,6 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.response;
 
+import com.dinhngoctranduy.model.dto.ImageDTO;
 import com.dinhngoctranduy.util.constant.TourCategory;
 import com.dinhngoctranduy.util.constant.TourRegion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

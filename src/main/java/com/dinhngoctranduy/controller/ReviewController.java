@@ -1,12 +1,11 @@
 package com.dinhngoctranduy.controller;
 
 import com.dinhngoctranduy.model.dto.ReviewDTO;
-import com.dinhngoctranduy.model.dto.TourReviewsResponseDTO;
+import com.dinhngoctranduy.model.response.TourReviewsResponseDTO;
 import com.dinhngoctranduy.service.ReviewService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

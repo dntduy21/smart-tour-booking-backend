@@ -1,8 +1,8 @@
 package com.dinhngoctranduy.controller;
 
-import com.dinhngoctranduy.model.dto.TourRequestDTO;
-import com.dinhngoctranduy.model.dto.TourResponseDTO;
-import com.dinhngoctranduy.model.dto.TourSearchRequest;
+import com.dinhngoctranduy.model.request.TourRequestDTO;
+import com.dinhngoctranduy.model.response.TourResponseDTO;
+import com.dinhngoctranduy.model.request.TourSearchRequest;
 import com.dinhngoctranduy.service.TourService;
 import com.dinhngoctranduy.util.HtmlBuilder;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
@@ -16,7 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/v1/tours")

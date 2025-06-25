@@ -1,6 +1,6 @@
 package com.dinhngoctranduy.service.impl;
 
-import com.dinhngoctranduy.model.dto.statistic.DashboardDto;
+import com.dinhngoctranduy.model.dto.statistic.DashboardDTO;
 import com.dinhngoctranduy.repository.BookingRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -12,8 +12,8 @@ public class DashboardService {
 
     private final BookingRepository bookingRepo;
 
-    public DashboardDto getDashboardOverview() {
-        DashboardDto dto = new DashboardDto();
+    public DashboardDTO getDashboardOverview() {
+        DashboardDTO dto = new DashboardDTO();
 
         dto.setTotalBookings(bookingRepo.countActiveBookings());
         dto.setTotalRevenue(bookingRepo.sumTotalRevenue());

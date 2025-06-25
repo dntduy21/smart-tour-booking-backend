@@ -1,8 +1,8 @@
 package com.dinhngoctranduy.service.impl;
 
-import com.dinhngoctranduy.exceptions.InvalidDataException;
+import com.dinhngoctranduy.util.error.InvalidDataException;
 import com.dinhngoctranduy.model.Refund;
-import com.dinhngoctranduy.model.dto.RefundDto;
+import com.dinhngoctranduy.model.dto.RefundDTO;
 import com.dinhngoctranduy.repository.RefundRepository;
 import com.dinhngoctranduy.util.constant.RefundStatus;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class RefundService {
 
     private final RefundRepository refundRepository;
 
-    public RefundDto updateRefundStatusByBookingId(Long bookingId, RefundStatus status) {
+    public RefundDTO updateRefundStatusByBookingId(Long bookingId, RefundStatus status) {
         Refund refund = refundRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new InvalidDataException("Refund not found for bookingId: " + bookingId));
 
@@ -31,7 +31,7 @@ public class RefundService {
         }
 
         Refund r = refundRepository.save(refund);
-        return RefundDto.mapToDto(r);
+        return RefundDTO.mapToDto(r);
     }
 
 }

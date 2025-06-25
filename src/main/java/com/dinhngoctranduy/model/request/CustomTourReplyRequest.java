@@ -1,4 +1,4 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

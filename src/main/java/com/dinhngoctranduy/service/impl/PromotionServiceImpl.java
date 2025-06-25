@@ -2,8 +2,8 @@ package com.dinhngoctranduy.service.impl;
 
 import com.dinhngoctranduy.model.Promotion;
 import com.dinhngoctranduy.model.User;
-import com.dinhngoctranduy.model.dto.PromotionRequest;
-import com.dinhngoctranduy.model.dto.PromotionResponse;
+import com.dinhngoctranduy.model.request.PromotionRequest;
+import com.dinhngoctranduy.model.response.PromotionResponse;
 import com.dinhngoctranduy.repository.PromotionRepository;
 import com.dinhngoctranduy.service.EmailService;
 import com.dinhngoctranduy.service.PromotionService;

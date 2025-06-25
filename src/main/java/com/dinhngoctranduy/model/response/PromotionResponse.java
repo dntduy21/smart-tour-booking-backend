@@ -1,7 +1,9 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.response;
+
 import lombok.*;
 
 import java.time.Instant;
+
 @Getter
 @Setter
 @NoArgsConstructor

@@ -19,14 +19,12 @@ public class FileStorageService {
     private final Path fileStorageLocation;
 
     public FileStorageService(@Value("${upload-file.base-path}") String basePath) {
-        // SỬA DÒNG NÀY: Dùng regex linh hoạt hơn để xóa "file:" và các dấu "/" theo sau
         String actualPath = basePath.replaceFirst("^file:/*", "");
 
         this.fileStorageLocation = Paths.get(actualPath).toAbsolutePath().normalize();
     }
 
     public String storeFile(MultipartFile file) {
-        // ... (phần còn lại của class giữ nguyên)
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
 

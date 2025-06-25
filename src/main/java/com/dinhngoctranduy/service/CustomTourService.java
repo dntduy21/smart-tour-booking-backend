@@ -1,12 +1,13 @@
 package com.dinhngoctranduy.service;
 
-import com.dinhngoctranduy.model.dto.CustomTourResponse;
+import com.dinhngoctranduy.model.request.CustomTourRequest;
+import com.dinhngoctranduy.model.response.CustomTourResponse;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface CustomTourService {
-    CustomTourResponse createCustomTour(com.dinhngoctranduy.model.dto.CustomTourRequest request);
+    CustomTourResponse createCustomTour(CustomTourRequest request);
 
     List<CustomTourResponse> getAllCustomTours(Pageable pageable);
 

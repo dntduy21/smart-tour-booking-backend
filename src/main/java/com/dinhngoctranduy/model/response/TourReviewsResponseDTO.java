@@ -1,5 +1,6 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.response;
 
+import com.dinhngoctranduy.model.dto.ReviewDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,8 +1,11 @@
 package com.dinhngoctranduy.service.impl;
 
-import com.dinhngoctranduy.exceptions.InvalidDataException;
+import com.dinhngoctranduy.util.error.InvalidDataException;
 import com.dinhngoctranduy.model.*;
 import com.dinhngoctranduy.model.dto.*;
+import com.dinhngoctranduy.model.request.BookingRequest;
+import com.dinhngoctranduy.model.response.BookingResponse;
+import com.dinhngoctranduy.model.response.CancelResponse;
 import com.dinhngoctranduy.repository.*;
 import com.dinhngoctranduy.service.BookingService;
 import com.dinhngoctranduy.service.EmailService;
@@ -329,7 +332,7 @@ public class BookingServiceImpl implements BookingService {
                 .totalPrice(booking.getTotalPrice())
                 .status(booking.getStatus().name())
                 .bookingAt(booking.getBookingDate())
-                .promotionDto(PromotionDto.fromDomain(booking.getPromotion()))
+                .promotionDto(PromotionDTO.fromDomain(booking.getPromotion()))
                 .participants(
                         booking.getParticipants() == null ? new ArrayList<>() :
                                 Arrays.stream(
@@ -355,7 +358,7 @@ public class BookingServiceImpl implements BookingService {
                 .build();
 
         if (booking.getRefund() != null) {
-            response.setRefund(RefundDto.mapToDto(booking.getRefund()));
+            response.setRefund(RefundDTO.mapToDto(booking.getRefund()));
         }
         return response;
     }

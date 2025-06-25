@@ -1,4 +1,4 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.request;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

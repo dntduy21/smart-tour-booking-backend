@@ -12,7 +12,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RefundDto {
+public class RefundDTO {
     private Long id;
     private Instant createdAt;
     private Instant refundAt;
@@ -21,10 +21,10 @@ public class RefundDto {
     private RefundStatus status;
     private Long bookingId;
 
-    public static RefundDto mapToDto(Refund refund) {
+    public static RefundDTO mapToDto(Refund refund) {
         if (refund == null) return null;
 
-        return RefundDto.builder()
+        return RefundDTO.builder()
                 .id(refund.getId())
                 .createdAt(refund.getCreatedAt())
                 .refundAt(refund.getRefundAt())
@@ -35,7 +35,7 @@ public class RefundDto {
                 .build();
     }
 
-    public static Refund mapToEntity(RefundDto dto, Booking booking) {
+    public static Refund mapToEntity(RefundDTO dto, Booking booking) {
         if (dto == null || booking == null) return null;
 
         return Refund.builder()

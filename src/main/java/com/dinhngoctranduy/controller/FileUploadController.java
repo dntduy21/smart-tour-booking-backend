@@ -1,6 +1,6 @@
 package com.dinhngoctranduy.controller;
 
-import com.dinhngoctranduy.model.dto.FileUploadResponseDTO;
+import com.dinhngoctranduy.model.response.FileUploadResponseDTO;
 import com.dinhngoctranduy.service.FileStorageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/files") // Đặt một đường dẫn chung cho các API liên quan đến file
+@RequestMapping("/api/v1/files")
 public class FileUploadController {
 
     private final FileStorageService fileStorageService;

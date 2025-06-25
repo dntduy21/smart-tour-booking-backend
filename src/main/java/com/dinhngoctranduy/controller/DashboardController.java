@@ -1,6 +1,6 @@
 package com.dinhngoctranduy.controller;
 
-import com.dinhngoctranduy.model.dto.statistic.DashboardDto;
+import com.dinhngoctranduy.model.dto.statistic.DashboardDTO;
 import com.dinhngoctranduy.service.impl.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +16,8 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping
-    public ResponseEntity<DashboardDto> getDashboard() {
-        DashboardDto dashboard = dashboardService.getDashboardOverview();
+    public ResponseEntity<DashboardDTO> getDashboard() {
+        DashboardDTO dashboard = dashboardService.getDashboardOverview();
         return ResponseEntity.ok(dashboard);
     }
 }

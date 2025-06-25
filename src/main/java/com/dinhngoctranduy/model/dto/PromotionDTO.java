@@ -14,18 +14,18 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PromotionDto {
+public class PromotionDTO {
     private Long id;
     private String code;
     private double discountPercent;
     private Instant startAt;
     private Instant endAt;
 
-    public static PromotionDto fromDomain(Promotion promotion) {
+    public static PromotionDTO fromDomain(Promotion promotion) {
         if(promotion == null) {
             return null;
         }
-        return PromotionDto.builder()
+        return PromotionDTO.builder()
                 .id(promotion.getId())
                 .code(promotion.getCode())
                 .discountPercent(promotion.getDiscountPercent())

@@ -1,12 +1,12 @@
 package com.dinhngoctranduy.service.impl;
 
-import com.dinhngoctranduy.exceptions.InvalidDataException;
+import com.dinhngoctranduy.util.error.InvalidDataException;
 import com.dinhngoctranduy.model.Image;
 import com.dinhngoctranduy.model.Tour;
 import com.dinhngoctranduy.model.dto.ImageDTO;
-import com.dinhngoctranduy.model.dto.TourRequestDTO;
-import com.dinhngoctranduy.model.dto.TourResponseDTO;
-import com.dinhngoctranduy.model.dto.TourSearchRequest;
+import com.dinhngoctranduy.model.request.TourRequestDTO;
+import com.dinhngoctranduy.model.response.TourResponseDTO;
+import com.dinhngoctranduy.model.request.TourSearchRequest;
 import com.dinhngoctranduy.repository.TourRepository;
 import com.dinhngoctranduy.repository.TourSpecification;
 import com.dinhngoctranduy.service.TourService;

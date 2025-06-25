@@ -1,7 +1,7 @@
 package com.dinhngoctranduy.service;
 
 import com.dinhngoctranduy.model.dto.ReviewDTO;
-import com.dinhngoctranduy.model.dto.TourReviewsResponseDTO;
+import com.dinhngoctranduy.model.response.TourReviewsResponseDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

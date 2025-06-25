@@ -1,12 +1,12 @@
 package com.dinhngoctranduy.service.impl;
 
-import com.dinhngoctranduy.exceptions.InvalidDataException;
+import com.dinhngoctranduy.util.error.InvalidDataException;
 import com.dinhngoctranduy.model.Booking;
 import com.dinhngoctranduy.model.Review;
 import com.dinhngoctranduy.model.Tour;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.dto.ReviewDTO;
-import com.dinhngoctranduy.model.dto.TourReviewsResponseDTO;
+import com.dinhngoctranduy.model.response.TourReviewsResponseDTO;
 import com.dinhngoctranduy.repository.ReviewRepository;
 import com.dinhngoctranduy.repository.TourRepository;
 import com.dinhngoctranduy.repository.UserRepository;

@@ -71,5 +71,4 @@ public class Booking {
         return user == null? guestName : user.getFullName();
     }
 
-
 }

@@ -146,7 +146,7 @@ public class EmailService {
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Xác nhận Đặt tour - TourVN</title>
+                    <title>Xác nhận Đặt tour - SmartTour</title>
                     <style>
                         body {
                             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -255,7 +255,7 @@ public class EmailService {
                         <div class="footer">
                             <p>Trân trọng,</p>
                             <p>Đội ngũ hỗ trợ SmartTour</p>
-                            <p>Bản quyền &copy; %s TourVN. All rights reserved.</p>
+                            <p>Bản quyền &copy; %s SmartTour. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -294,7 +294,7 @@ public class EmailService {
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Hủy Tour Thành Công - TourVN</title>
+                    <title>Hủy Tour Thành Công - SmartTour</title>
                     <style>
                         body {
                             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -390,7 +390,7 @@ public class EmailService {
                                     <li><strong>Phí Hủy Tour:</strong> %s%%</li>
                                     <li><strong>Số Tiền Hoàn Lại Dự Kiến:</strong> %s VND</li>
                                 </ul>
-                                <p>Số tiền hoàn lại sẽ được xử lý trong vòng <strong>3 ngày làm việc</strong> và sẽ được chuyển về phương thức thanh toán ban đầu của bạn.</p>
+                                <p>Số tiền hoàn lại sẽ được xử lý trong vòng <strong>3 ngày làm việc</strong></p>
                             </div>
                 
                             <p>Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ thêm, vui lòng liên hệ với bộ phận hỗ trợ khách hàng của chúng tôi.</p>

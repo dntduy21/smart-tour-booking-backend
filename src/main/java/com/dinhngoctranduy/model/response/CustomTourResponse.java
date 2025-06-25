@@ -1,4 +1,4 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.response;
 
 import com.dinhngoctranduy.util.constant.TourRegion;
 import lombok.Builder;

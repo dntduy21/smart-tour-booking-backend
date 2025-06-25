@@ -1,4 +1,4 @@
-package com.dinhngoctranduy.model.dto;
+package com.dinhngoctranduy.model.request;
 
 import com.dinhngoctranduy.model.Participant;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
