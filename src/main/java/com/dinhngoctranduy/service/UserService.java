@@ -93,6 +93,8 @@ public class UserService {
         res.setAddress(user.getAddress());
         res.setBirthDate(user.getBirthDate());
         res.setGender(user.getGender());
+        res.setDeleted(user.isDeleted());
+        res.setBlocked(user.isBlocked());
         return res;
     }
 

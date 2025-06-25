@@ -1,5 +1,6 @@
-package com.dinhngoctranduy.model.response;
+package com.dinhngoctranduy.model.dto;
 
+import com.dinhngoctranduy.model.response.ResUserDTO;
 import com.dinhngoctranduy.util.constant.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,11 +9,11 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Getter
 @Setter
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
-public class ResUserDTO {
+@NoArgsConstructor
+public class AccountDTO {
     private long id;
     private String fullName;
     private String email;
@@ -20,9 +21,10 @@ public class ResUserDTO {
     private String phone;
     private LocalDate birthDate;
     private Gender gender;
-    private RoleUser role;
+    private ResUserDTO.RoleUser role;
     private boolean blocked;
     private boolean deleted;
+    private String password;
 
     @Getter
     @Setter

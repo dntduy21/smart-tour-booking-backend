@@ -31,7 +31,7 @@ public class CustomTourController {
     @GetMapping
     public ResponseEntity<List<CustomTourResponse>> getAllCustomTours(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "1000") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         List<CustomTourResponse> responses = customTourService.getAllCustomTours(pageable);

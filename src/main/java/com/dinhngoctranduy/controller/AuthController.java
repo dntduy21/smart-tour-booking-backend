@@ -3,6 +3,7 @@ package com.dinhngoctranduy.controller;
 import com.dinhngoctranduy.model.Role;
 import com.dinhngoctranduy.model.User;
 import com.dinhngoctranduy.model.VerificationToken;
+import com.dinhngoctranduy.model.dto.AccountDTO;
 import com.dinhngoctranduy.model.dto.LoginDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
 import com.dinhngoctranduy.model.response.ResLoginDTO;
@@ -32,7 +33,6 @@ public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
     private final RoleService roleService;
@@ -41,7 +41,6 @@ public class AuthController {
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
                           SecurityUtil securityUtil,
                           UserService userService,
-                          PasswordEncoder passwordEncoder,
                           VerificationTokenService verificationTokenService,
                           EmailService emailService,
                           RoleService roleService,
@@ -49,7 +48,6 @@ public class AuthController {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.verificationTokenService = verificationTokenService;
         this.emailService = emailService;
         this.roleService = roleService;
@@ -88,9 +86,6 @@ public class AuthController {
         if (userService.isEmailExists(user.getEmail())) {
             throw new IdInValidException("Email đã được sử dụng");
         }
-
-        String hashPassword = this.passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashPassword);
 
         Role defaultRole = this.roleService.fetchById(1);
         user.setRole(defaultRole);
@@ -184,13 +179,13 @@ public class AuthController {
     }
 
     @GetMapping("/account")
-    public ResponseEntity<ResUserDTO> getAccount() {
+    public ResponseEntity<AccountDTO> getAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent()
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
 
         User currentUserDB = this.userService.handleGetUserByUsername(email);
-        ResUserDTO userLogin = new ResUserDTO();
+        AccountDTO userLogin = new AccountDTO();
 
         if (currentUserDB != null) {
             userLogin.setId(currentUserDB.getId());
@@ -203,6 +198,7 @@ public class AuthController {
             Role role = currentUserDB.getRole();
             ResUserDTO.RoleUser roleDTO = new ResUserDTO.RoleUser(role.getId(), role.getName());
             userLogin.setRole(roleDTO);
+            userLogin.setPassword(currentUserDB.getPassword());
         }
 
         return ResponseEntity.ok().body(userLogin);
