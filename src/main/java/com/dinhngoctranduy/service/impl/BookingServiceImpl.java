@@ -242,6 +242,13 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new InvalidDataException("Booking not found"));
 
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new InvalidDataException("Đơn này đã được hủy trước đó.");
+        }
+        if (booking.getRefund() != null) {
+            throw new InvalidDataException("Đơn này đã có thông tin hoàn tiền, không thể hủy lại.");
+        }
+
         Tour tour = booking.getTour();
         Instant now = Instant.now();
         LocalDateTime startDate = tour.getStartDate();
@@ -301,11 +308,15 @@ public class BookingServiceImpl implements BookingService {
         );
         bookingRepo.save(booking);
 
+        Booking bookingFull = bookingRepo.findFullById(bookingId)
+                .orElseThrow(() -> new InvalidDataException("Booking not found after update"));
+
         CompletableFuture.runAsync(() -> {
             try {
-                emailService.sendBookingCancelEmail(booking, booking.getTotalPrice(), penaltyPercent, refundAmount);
+                emailService.sendBookingCancelEmail(bookingFull, bookingFull.getTotalPrice(), penaltyPercent, refundAmount);
             } catch (Exception e) {
-                System.err.println("Failed to send cancellation email for booking " + booking.getId() + ": " + e.getMessage());
+                System.err.println("Failed to send cancellation email for booking " + bookingFull.getId() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         });
 
