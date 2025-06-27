@@ -1,5 +1,6 @@
 package com.dinhngoctranduy.service.impl;
 
+import com.dinhngoctranduy.model.dto.ReviewTourDTO;
 import com.dinhngoctranduy.util.error.InvalidDataException;
 import com.dinhngoctranduy.model.Booking;
 import com.dinhngoctranduy.model.Review;
@@ -95,8 +96,8 @@ public class ReviewServiceImpl implements ReviewService {
     public TourReviewsResponseDTO getReviewsByTourId(Long tourId) {
         // 1. Lấy danh sách các review chi tiết
         List<Review> reviews = reviewRepo.findByTourId(tourId);
-        List<ReviewDTO> reviewDTOs = reviews.stream()
-                .map(this::toDto)
+        List<ReviewTourDTO> reviewDTOs = reviews.stream()
+                .map(this::toReviewTourDTO)
                 .collect(Collectors.toList());
 
         // 2. Lấy điểm rating trung bình từ repository
@@ -126,6 +127,18 @@ public class ReviewServiceImpl implements ReviewService {
                 .comment(review.getComment())
                 .tourId(review.getTour().getId())
                 .userId(review.getUser().getId())
+                .build();
+    }
+
+    private ReviewTourDTO toReviewTourDTO(Review review) {
+        return ReviewTourDTO.builder()
+                .id(review.getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .tourId(review.getTour().getId())
+                .userId(review.getUser().getId())
+                .username(review.getUser().getUsername())
+                .fullName(review.getUser().getFullName())
                 .build();
     }
 }
