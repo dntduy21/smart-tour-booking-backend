@@ -19,9 +19,6 @@ public class Invoice {
     private double amount;
     private Instant issuedAt;
 
-    @Column(length = 2000)
-    private String details;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false, unique = true)
     private Booking booking;
