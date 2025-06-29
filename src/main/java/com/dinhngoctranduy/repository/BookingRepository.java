@@ -58,7 +58,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
     // Top tour theo lượt đặt
     @Query("SELECT new com.dinhngoctranduy.model.dto.statistic.TourStat(" +
             "b.tour.id, b.tour.title, COUNT(b)) " +
-            "FROM Booking b WHERE b.status = 'CONFIRMED' " +
+            "FROM Booking b WHERE b.status = 'CONFIRMED' OR b.status = 'COMPLETED' " +
             "GROUP BY b.tour.id, b.tour.title ORDER BY COUNT(b) DESC")
     List<TourStat> topBookedTours(Pageable pageable);
 
