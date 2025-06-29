@@ -25,6 +25,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.properties.TextAlignment;
+
+import java.nio.file.Paths;
+
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -284,51 +295,74 @@ public class TourServiceImpl implements TourService {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
+            Document document = new Document(pdf, PageSize.A4.rotate());
 
-            // Tạo bảng 11 cột (bổ sung itinerary)
-            Table table = new Table(UnitValue.createPercentArray(new float[]{3, 5, 2, 2, 2, 3, 2, 3, 3, 3, 4}))
-                    .useAllAvailableWidth();
+            // Font tùy chỉnh hỗ trợ tiếng Việt
+            PdfFont font;
+            PdfFont fontBold;
+            try {
+                String regularFontPath = getClass().getClassLoader().getResource("fonts/NotoSans-Regular.ttf").getPath();
+                String boldFontPath = getClass().getClassLoader().getResource("fonts/NotoSans-Bold.ttf").getPath();
 
-            // Header
-            table.addHeaderCell("Title");
-            table.addHeaderCell("Description");
-            table.addHeaderCell("Capacity");
-            table.addHeaderCell("Price Adults");
-            table.addHeaderCell("Price Children");
-            table.addHeaderCell("Code");
-            table.addHeaderCell("Category");
-            table.addHeaderCell("Region");
-            table.addHeaderCell("Destination");
-            table.addHeaderCell("Start Date - End Date");
-            table.addHeaderCell("Itinerary");
+                font = PdfFontFactory.createFont(regularFontPath, PdfEncodings.IDENTITY_H);
+                fontBold = PdfFontFactory.createFont(boldFontPath, PdfEncodings.IDENTITY_H);
 
-            // Dữ liệu
+            } catch (IOException e) {
+                throw new RuntimeException("Không thể load font tùy chỉnh", e);
+            }
+
+            document.setFont(font);
+            document.setFontSize(10);
+
+            Paragraph title = new Paragraph("DANH SÁCH CÁC TOUR DU LỊCH")
+                    .setFont(fontBold)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setFontSize(14)
+                    .setBold()
+                    .setMarginBottom(15);
+            document.add(title);
+
+            float[] columnWidths = {4, 8, 2, 3, 3, 3, 3, 3, 4, 5, 10};
+            Table table = new Table(UnitValue.createPercentArray(columnWidths)).useAllAvailableWidth();
+
+            String[] headers = {
+                    "Tiêu đề", "Mô tả", "Sức chứa", "Giá Người Lớn", "Giá Trẻ Em", "Mã",
+                    "Thể loại", "Khu vực", "Điểm đến", "Ngày", "Lịch trình"
+            };
+
+            for (String h : headers) {
+                table.addHeaderCell(new com.itextpdf.layout.element.Cell()
+                        .add(new Paragraph(h).setFont(fontBold))
+                        .setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            }
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
             for (TourResponseDTO tour : tours) {
-                table.addCell(tour.getTitle());
-                table.addCell(tour.getDescription());
-                table.addCell(String.valueOf(tour.getCapacity()));
-                table.addCell(String.valueOf(tour.getPriceAdults()));
-                table.addCell(String.valueOf(tour.getPriceChildren()));
-                table.addCell(tour.getCode());
-                table.addCell(tour.getCategory().toString());
-                table.addCell(tour.getRegion().toString());
-                table.addCell(tour.getDestination());
-                table.addCell(tour.getStartDate().format(formatter) + " - " + tour.getEndDate().format(formatter));
-                // Nối itinerary list thành chuỗi
-                String itineraryStr = String.join(", ", tour.getItinerary());
-                table.addCell(itineraryStr);
+                table.addCell(new Paragraph(tour.getTitle()));
+                table.addCell(new Paragraph(tour.getDescription()));
+                table.addCell(new Paragraph(String.valueOf(tour.getCapacity())));
+                table.addCell(new Paragraph(String.format("%,.0f", tour.getPriceAdults())));
+                table.addCell(new Paragraph(String.format("%,.0f", tour.getPriceChildren())));
+                table.addCell(new Paragraph(tour.getCode()));
+                table.addCell(new Paragraph(tour.getCategory().toString()));
+                table.addCell(new Paragraph(tour.getRegion().toString()));
+                table.addCell(new Paragraph(tour.getDestination()));
+                table.addCell(new Paragraph(
+                        tour.getStartDate().format(formatter) + " - " +
+                                tour.getEndDate().format(formatter)
+                ));
+                table.addCell(new Paragraph(String.join("\n", tour.getItinerary())));
             }
 
             document.add(table);
             document.close();
-
             return baos.toByteArray();
+
         } catch (Exception e) {
             throw new RuntimeException("Error generating PDF", e);
         }
     }
-
 
     public static ByteArrayInputStream toursToExcel(List<TourResponseDTO> tours) throws IOException {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {

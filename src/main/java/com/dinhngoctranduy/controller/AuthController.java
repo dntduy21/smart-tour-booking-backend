@@ -203,4 +203,40 @@ public class AuthController {
 
         return ResponseEntity.ok().body(userLogin);
     }
+
+    @PutMapping("/account")
+    public ResponseEntity<AccountDTO> updateAccount(@RequestBody AccountDTO profileUpdateDTO) {
+        String email = SecurityUtil.getCurrentUserLogin()
+                .orElseThrow(() -> new RuntimeException("Authentication Error: User not found in security context"));
+
+        User updatedUser = this.userService.handleUpdateProfile(email, profileUpdateDTO);
+
+        AccountDTO responseDTO = mapUserToAccountDTO(updatedUser);
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    private AccountDTO mapUserToAccountDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        AccountDTO dto = new AccountDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setGender(user.getGender());
+
+        if (user.getRole() != null) {
+            Role role = user.getRole();
+            ResUserDTO.RoleUser roleDTO = new ResUserDTO.RoleUser(role.getId(), role.getName());
+            dto.setRole(roleDTO);
+        }
+        dto.setPassword(user.getPassword());
+
+        return dto;
+    }
 }

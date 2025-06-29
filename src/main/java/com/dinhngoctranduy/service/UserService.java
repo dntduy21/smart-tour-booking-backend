@@ -1,6 +1,7 @@
 package com.dinhngoctranduy.service;
 
 import com.dinhngoctranduy.model.User;
+import com.dinhngoctranduy.model.dto.AccountDTO;
 import com.dinhngoctranduy.model.dto.Meta;
 import com.dinhngoctranduy.model.dto.ResultPaginationDTO;
 import com.dinhngoctranduy.model.response.ResCreateUserDTO;
@@ -154,6 +155,46 @@ public class UserService {
         }
 
         return userRepository.save(userCurrent);
+    }
+
+    public User handleUpdateProfile(String username, AccountDTO profileUpdateDTO) {
+        User currentUser = this.userRepository.findByUsername(username);
+
+        if (currentUser == null) {
+            throw new RuntimeException("User not found with username: " + username);
+        }
+        // KIỂM TRA MẬT KHẨU:
+        // Mật khẩu là bắt buộc cho bất kỳ thay đổi nào
+        if (profileUpdateDTO.getPassword() == null || profileUpdateDTO.getPassword().isBlank()) {
+            throw new RuntimeException("Password is required to confirm changes.");
+        }
+
+        // Dùng passwordEncoder để so sánh mật khẩu người dùng nhập với mật khẩu trong DB
+        boolean isPasswordMatch = passwordEncoder.matches(profileUpdateDTO.getPassword(), currentUser.getPassword());
+
+        if (!isPasswordMatch) {
+            // Nếu mật khẩu không khớp, ném ra lỗi ngay lập tức
+            throw new RuntimeException("Incorrect password. Update failed.");
+        }
+
+        // CẬP NHẬT THÔNG TIN: Nếu mật khẩu khớp, tiến hành cập nhật
+        if (profileUpdateDTO.getFullName() != null) {
+            currentUser.setFullName(profileUpdateDTO.getFullName());
+        }
+        if (profileUpdateDTO.getAddress() != null) {
+            currentUser.setAddress(profileUpdateDTO.getAddress());
+        }
+        if (profileUpdateDTO.getPhone() != null) {
+            currentUser.setPhone(profileUpdateDTO.getPhone());
+        }
+        if (profileUpdateDTO.getBirthDate() != null) {
+            currentUser.setBirthDate(profileUpdateDTO.getBirthDate());
+        }
+        if (profileUpdateDTO.getGender() != null) {
+            currentUser.setGender(profileUpdateDTO.getGender());
+        }
+
+        return userRepository.save(currentUser);
     }
 
 
