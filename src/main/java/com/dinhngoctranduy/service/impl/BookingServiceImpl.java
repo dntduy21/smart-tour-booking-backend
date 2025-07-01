@@ -133,43 +133,24 @@ public class BookingServiceImpl implements BookingService {
 
         booking = bookingRepo.save(booking);
 
-//        if (Boolean.TRUE.equals(req.getIsCashPayment())) {
-//            try {
-//                String subject = "Xác nhận đặt tour và hóa đơn của bạn";
-//                String htmlContent = emailService.buildBookingConfirmationHtml(
-//                        booking.getGuestName(),
-//                        booking.getTour().getTitle() != null ? booking.getTour().getTitle() : booking.getTour().getTitle(),
-//                        booking.getId().toString(),
-//                        booking.getTotalPrice()
-//                );
-//                emailService.sendBookingConfirmationEmail(booking.getGuestEmail(), subject, htmlContent);
-//            } catch (MessagingException e) {
-//                System.err.println("Không thể gửi email xác nhận đặt chỗ cho booking " + booking.getId() + ": " + e.getMessage());
-//            }
-//
-//            return mapToBookingResponse(booking);
-//        }
-//        return vnPayService.createPaymentUrl(booking, baseUrl);
-
-        try {
-            String subject = Boolean.TRUE.equals(req.getIsCashPayment())
-                    ? "Xác nhận đặt tour và hóa đơn của bạn"
-                    : "Đặt tour thành công - Vui lòng hoàn tất thanh toán chuyển khoản";
-            String htmlContent = emailService.buildBookingConfirmationHtml(
-                    booking.getGuestName(),
-                    booking.getTour().getTitle(),
-                    booking.getId().toString(),
-                    booking.getTotalPrice()
-            );
-            emailService.sendBookingConfirmationEmail(booking.getGuestEmail(), subject, htmlContent);
-        } catch (MessagingException e) {
-            System.err.println("Không thể gửi email xác nhận đặt chỗ cho booking " + booking.getId() + ": " + e.getMessage());
-        }
-
         if (Boolean.TRUE.equals(req.getIsCashPayment())) {
+            try {
+                String subject = "Xác nhận đặt tour và hóa đơn của bạn";
+                String htmlContent = emailService.buildBookingConfirmationHtml(
+                        booking.getGuestName(),
+                        booking.getTour().getTitle(),
+                        booking.getId().toString(),
+                        booking.getTotalPrice()
+                );
+                emailService.sendBookingConfirmationEmail(booking.getGuestEmail(), subject, htmlContent);
+            } catch (MessagingException e) {
+                System.err.println("Không thể gửi email xác nhận đặt chỗ cho booking " + booking.getId() + ": " + e.getMessage());
+            }
             return mapToBookingResponse(booking);
+        } else {
+            // Chuyển khoản: không gửi email ở đây
+            return vnPayService.createPaymentUrl(booking, baseUrl);
         }
-        return vnPayService.createPaymentUrl(booking, baseUrl);
     }
 
     public PaymentResponse handleVnPayReturn(Map<String, String> params) {
