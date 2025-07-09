@@ -148,7 +148,6 @@ public class BookingServiceImpl implements BookingService {
             }
             return mapToBookingResponse(booking);
         } else {
-            // Chuyển khoản: không gửi email ở đây
             return vnPayService.createPaymentUrl(booking, baseUrl);
         }
     }
