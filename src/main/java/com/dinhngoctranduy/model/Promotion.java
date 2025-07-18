@@ -21,7 +21,7 @@ public class Promotion {
 
     private String code;
 
-    @Column(length = 1000)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String description;
     private double discountPercent;
 

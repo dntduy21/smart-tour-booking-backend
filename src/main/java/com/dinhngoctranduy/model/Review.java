@@ -20,7 +20,7 @@ public class Review {
     private Long id;
     private int rating;
 
-    @Column(length = 2000)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String comment;
     private Instant reviewedAt;
 

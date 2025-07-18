@@ -77,6 +77,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/finished").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/ongoing").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/{id}/tours").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/banners").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

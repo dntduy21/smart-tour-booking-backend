@@ -20,6 +20,7 @@ public class Holiday {
     private int month; // 1-12
     private int day;   // 1-31
 
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

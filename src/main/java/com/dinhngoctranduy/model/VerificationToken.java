@@ -22,7 +22,7 @@ public class VerificationToken {
     private String token;
     private LocalDateTime expiresAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 }

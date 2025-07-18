@@ -26,7 +26,7 @@ public class Tour {
     @NotBlank
     private String title;
 
-    @Column(length = 2000)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
     private int capacity;

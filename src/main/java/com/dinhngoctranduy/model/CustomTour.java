@@ -19,7 +19,7 @@ public class CustomTour {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 2000)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
     private int capacity;
