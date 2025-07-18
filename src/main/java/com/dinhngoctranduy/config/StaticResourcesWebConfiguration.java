@@ -13,6 +13,9 @@ public class StaticResourcesWebConfiguration implements WebMvcConfigurer {
     @Value("${upload-file.base-path}")
     private String basePath;
 
+    @Value("${upload-banner.base-path}")
+    private String bannerBasePath;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Kiểm tra và tạo thư mục nếu chưa tồn tại
@@ -21,6 +24,10 @@ public class StaticResourcesWebConfiguration implements WebMvcConfigurer {
         // Cấu hình resource handler
         registry.addResourceHandler("/storage/**")
                 .addResourceLocations(basePath);
+
+        createDirectoryIfNotExists(bannerBasePath);
+        registry.addResourceHandler("/banners/**")
+                .addResourceLocations(bannerBasePath);
     }
 
     private void createDirectoryIfNotExists(String path) {

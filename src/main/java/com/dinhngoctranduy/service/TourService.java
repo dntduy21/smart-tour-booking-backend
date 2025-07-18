@@ -31,4 +31,12 @@ public interface TourService {
     List<TourResponseDTO> searchTours(TourSearchRequest request, Boolean isDeleted);
 
     Tour updateAvailability(Long tourId, boolean available);
+
+    Page<TourResponseDTO> getUpcomingTours(int page, int size);
+
+    Page<TourResponseDTO> getOngoingTours(int page, int size);
+
+    Page<TourResponseDTO> getFinishedTours(int page, int size);
+
+    Page<TourResponseDTO> getToursByCategoryId(Long categoryId, int page, int size);
 }

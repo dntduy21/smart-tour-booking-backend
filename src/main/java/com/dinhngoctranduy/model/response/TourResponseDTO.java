@@ -1,7 +1,7 @@
 package com.dinhngoctranduy.model.response;
 
 import com.dinhngoctranduy.model.dto.ImageDTO;
-import com.dinhngoctranduy.util.constant.TourCategory;
+import com.dinhngoctranduy.model.dto.TourCategoryDTO;
 import com.dinhngoctranduy.util.constant.TourRegion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,7 +28,7 @@ public class TourResponseDTO {
     private LocalDateTime endDate;
     private String destination;
     private TourRegion region;
-    private TourCategory category;
+    private TourCategoryDTO category;
     private String airline;
     private String code;
     private Boolean available;

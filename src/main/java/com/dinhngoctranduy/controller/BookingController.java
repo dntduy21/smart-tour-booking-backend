@@ -9,6 +9,7 @@ import com.dinhngoctranduy.service.impl.BookingServiceImpl;
 import com.dinhngoctranduy.service.impl.RefundService;
 import com.dinhngoctranduy.util.SuccessPayload;
 import com.dinhngoctranduy.util.constant.BookingStatus;
+import com.dinhngoctranduy.util.constant.RefundStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -36,9 +38,9 @@ public class BookingController {
         Object response = bookingService.createBooking(request, baseUrl);
         return response instanceof String ? ResponseEntity.ok(
                 CreateResponse.builder()
-                                .vnPayUrl(
-                                        (String) response
-                                ).build()
+                        .vnPayUrl(
+                                (String) response
+                        ).build()
         ) : ResponseEntity.ok(response);
     }
 
@@ -88,13 +90,22 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
-    @PutMapping("/{bookingId}/update-refund-status")
-    public ResponseEntity<?> updateRefundStatusByBooking(@PathVariable Long bookingId,
-                                                 @RequestBody UpdateRefundStatusRequest request) {
-        RefundDTO updatedRefund = refundService.updateRefundStatusByBookingId(bookingId, request.getStatus());
+    @PutMapping(value = "/{bookingId}/update-refund-status", consumes = "multipart/form-data")
+    public ResponseEntity<RefundDTO> confirmRefundWithProof(
+            @PathVariable Long bookingId,
+            @RequestParam("status") String status,
+            @RequestParam("proofImage") MultipartFile proofImage) {
+
+        RefundStatus refundStatus = RefundStatus.valueOf(status.toUpperCase());
+        RefundDTO updatedRefund = refundService.updateRefundStatusAndProof(bookingId, refundStatus, proofImage);
         return ResponseEntity.ok(updatedRefund);
     }
 
+    @PostMapping("/{bookingId}/revert-cancellation")
+    public ResponseEntity<BookingResponse> revertBookingCancellation(@PathVariable Long bookingId) {
+        BookingResponse response = bookingService.revertBookingCancellation(bookingId);
+        return ResponseEntity.ok(response);
+    }
 
 
     @AllArgsConstructor

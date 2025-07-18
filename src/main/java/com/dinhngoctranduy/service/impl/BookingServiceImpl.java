@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.Gson;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -57,54 +58,52 @@ public class BookingServiceImpl implements BookingService {
         return mapToBookingResponse(booking);
     }
 
+    @Transactional
     public Object createBooking(BookingRequest req, String baseUrl) {
-        Tour tour = tourRepo.findByIdAndDeletedFalse(req.getTourId()).orElseThrow(() -> {
-            throw new InvalidDataException("Tour not found with id = " + req.getTourId());
-        });
-        Instant time = Instant.now();
 
-        if (tour.getStartDate() != null) {
-            Instant tourStartInstant = tour.getStartDate().atZone(ZoneId.systemDefault()).toInstant();
-            if (time.isAfter(tourStartInstant) || time.equals(tourStartInstant)) {
-                throw new RuntimeException("Đã quá hạn đặt tour. Không thể đặt tour sau hoặc trong ngày khởi hành.");
-            }
+        Tour tour = tourRepo.findByIdAndDeletedFalse(req.getTourId())
+                .orElseThrow(() -> new InvalidDataException("Không tìm thấy tour với id = " + req.getTourId()));
+
+        // Kiểm tra ngày khởi hành của tour
+        if (tour.getStartDate() != null && Instant.now().isAfter(tour.getStartDate().atZone(ZoneId.systemDefault()).toInstant())) {
+            throw new InvalidDataException("Đã quá hạn đặt tour. Không thể đặt tour đã hoặc sắp khởi hành.");
         }
+
+        // Kiểm tra sức chứa của tour
         int totalPeople = req.getAdults() + req.getChildren();
-        if (tour.getCapacity() < totalPeople) throw new RuntimeException("Không đủ chỗ cho tour này.");
-        else {
-            tour.setCapacity(tour.getCapacity() - totalPeople);
-        }
-        double price = req.getAdults() * tour.getPriceAdults() + req.getChildren() * tour.getPriceChildren();
-
-        Promotion promotion = null;
-        if (req.getPromotionCode() != null) {
-            Instant now = Instant.now();
-
-            promotion = promoRepo.findByCodeAndActiveTrue(req.getPromotionCode())
-                    .filter(p -> p.getUsageLimit() > 0 &&
-                            !now.isBefore(p.getStartAt()) &&
-                            !now.isAfter(p.getEndAt()))
-                    .orElse(null);
-            if (promotion != null) {
-
-                price = price * (100 - promotion.getDiscountPercent()) / 100.0;
-                promotion.setUsageLimit(promotion.getUsageLimit() - 1);
-                promoRepo.save(promotion);
-            } else {
-                throw new InvalidDataException("Not found or expired promotion = " + req.getUserId());
-            }
+        if (tour.getCapacity() < totalPeople) {
+            throw new InvalidDataException("Không đủ chỗ cho tour này. Chỉ còn lại " + tour.getCapacity() + " chỗ.");
         }
 
         User user = null;
         if (req.getUserId() != null) {
-            user = userRepository.findById(req.getUserId()).orElse(
-                    null
-            );
-            if (user == null) {
-                throw new InvalidDataException("Not found userId = " + req.getUserId());
-            }
+            user = userRepository.findById(req.getUserId())
+                    .orElseThrow(() -> new InvalidDataException("Không tìm thấy người dùng với id = " + req.getUserId()));
         }
 
+        // Tính giá gốc
+        double price = req.getAdults() * tour.getPriceAdults() + req.getChildren() * tour.getPriceChildren();
+
+        // Áp dụng khuyến mãi (nếu có)
+        Promotion promotion = null;
+        if (req.getPromotionCode() != null && !req.getPromotionCode().trim().isEmpty()) {
+            Instant now = Instant.now();
+            promotion = promoRepo.findByCodeAndActiveTrue(req.getPromotionCode())
+                    .orElseThrow(() -> new InvalidDataException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn."));
+
+            if (promotion.getUsageLimit() <= 0)
+                throw new InvalidDataException("Mã khuyến mãi này đã hết lượt sử dụng.");
+            if (now.isBefore(promotion.getStartAt()))
+                throw new InvalidDataException("Chưa đến ngày áp dụng mã khuyến mãi này.");
+            if (now.isAfter(promotion.getEndAt())) throw new InvalidDataException("Mã khuyến mãi đã hết hạn sử dụng.");
+
+            // Áp dụng giảm giá và cập nhật lại lượt sử dụng
+            price *= (1 - promotion.getDiscountPercent() / 100.0);
+            promotion.setUsageLimit(promotion.getUsageLimit() - 1);
+        }
+
+        // Giảm sức chứa của tour
+        tour.setCapacity(tour.getCapacity() - totalPeople);
 
         Booking booking = Booking.builder()
                 .adults(req.getAdults())
@@ -118,58 +117,31 @@ public class BookingServiceImpl implements BookingService {
                 .guestPhone(req.getGuestPhone())
                 .tour(tour)
                 .promotion(promotion)
-                .participants(req.getParticipants().stream().map(p -> {
-                    try {
-                        return new ObjectMapper().writeValueAsString(p);
-                    } catch (JsonProcessingException e) {
-                        return "";
-                    }
-                }).collect(Collectors.joining("##")))
+                .user(user)
                 .build();
 
-        if (user != null) {
-            booking.setUser(user);
-        }
+        // Liên kết các participant với booking
+        booking.setParticipantsAndLink(req.getParticipants());
 
-        booking = bookingRepo.save(booking);
-
-//        if (Boolean.TRUE.equals(req.getIsCashPayment())) {
-//            try {
-//                String subject = "Xác nhận đặt tour và hóa đơn của bạn";
-//                String htmlContent = emailService.buildBookingConfirmationHtml(
-//                        booking.getGuestName(),
-//                        booking.getTour().getTitle() != null ? booking.getTour().getTitle() : booking.getTour().getTitle(),
-//                        booking.getId().toString(),
-//                        booking.getTotalPrice()
-//                );
-//                emailService.sendBookingConfirmationEmail(booking.getGuestEmail(), subject, htmlContent);
-//            } catch (MessagingException e) {
-//                System.err.println("Không thể gửi email xác nhận đặt chỗ cho booking " + booking.getId() + ": " + e.getMessage());
-//            }
-//
-//            return mapToBookingResponse(booking);
-//        }
-//        return vnPayService.createPaymentUrl(booking, baseUrl);
-
-        try {
-            String subject = Boolean.TRUE.equals(req.getIsCashPayment())
-                    ? "Xác nhận đặt tour và hóa đơn của bạn"
-                    : "Đặt tour thành công - Vui lòng hoàn tất thanh toán chuyển khoản";
-            String htmlContent = emailService.buildBookingConfirmationHtml(
-                    booking.getGuestName(),
-                    booking.getTour().getTitle(),
-                    booking.getId().toString(),
-                    booking.getTotalPrice()
-            );
-            emailService.sendBookingConfirmationEmail(booking.getGuestEmail(), subject, htmlContent);
-        } catch (MessagingException e) {
-            System.err.println("Không thể gửi email xác nhận đặt chỗ cho booking " + booking.getId() + ": " + e.getMessage());
-        }
+        Booking savedBooking = bookingRepo.save(booking);
 
         if (Boolean.TRUE.equals(req.getIsCashPayment())) {
-            return mapToBookingResponse(booking);
+            try {
+                String subject = "Xác nhận đặt tour " + savedBooking.getTour().getTitle();
+                String htmlContent = emailService.buildBookingConfirmationHtml(
+                        savedBooking.getUserName(),
+                        savedBooking.getTour().getTitle(),
+                        savedBooking.getId().toString(),
+                        savedBooking.getTotalPrice()
+                );
+                emailService.sendBookingConfirmationEmail(savedBooking.getEmail(), subject, htmlContent);
+            } catch (MessagingException e) {
+                System.err.println("LỖI: Không thể gửi email xác nhận cho booking " + savedBooking.getId() + ": " + e.getMessage());
+            }
+            return mapToBookingResponse(savedBooking);
+        } else {
+            return vnPayService.createPaymentUrl(savedBooking, baseUrl);
         }
-        return vnPayService.createPaymentUrl(booking, baseUrl);
     }
 
     public PaymentResponse handleVnPayReturn(Map<String, String> params) {
@@ -184,13 +156,6 @@ public class BookingServiceImpl implements BookingService {
             String fullCallbackData = new Gson().toJson(params);
             booking.setPaymentStatus(PaymentStatus.PAID);
             booking.setStatus(BookingStatus.CONFIRMED);
-            booking.setInvoice(
-                    Invoice.builder()
-                            .amount(booking.getTotalPrice())
-                            .issuedAt(Instant.now())
-                            .booking(booking)
-                            .build()
-            );
             booking.setCheckout(
                     Checkout.builder()
                             .method(PaymentGateway.VNPAY)
@@ -208,11 +173,12 @@ public class BookingServiceImpl implements BookingService {
 
 
             bookingRepo.save(booking);
+            String receiverEmail = (user == null) ? booking.getGuestEmail() : user.getEmail();
 
             CompletableFuture.runAsync(() -> {
                 try {
                     emailService.sendBookingConfirmationEmail(
-                            user == null ? booking.getGuestEmail() : user.getEmail(),
+                            receiverEmail,
                             "Xác nhận đặt tour",
                             emailService.buildBookingConfirmationHtml(
                                     booking.getGuestName(),
@@ -259,7 +225,8 @@ public class BookingServiceImpl implements BookingService {
         }
 
         long hoursBefore = Duration.between(now, startAt).toHours();
-        boolean isHoliday = holidayService.isHoliday(startAt);
+        Instant endAt = tour.getEndDate().atZone(ZoneId.systemDefault()).toInstant();
+        boolean isHoliday = holidayService.hasHolidayInRange(startAt, endAt);
 
         double total = booking.getTotalPrice();
         double penaltyPercent;
@@ -323,6 +290,72 @@ public class BookingServiceImpl implements BookingService {
         return new CancelResponse(booking.getId(), total, penaltyPercent, refundAmount);
     }
 
+    public BookingResponse revertBookingCancellation(Long bookingId) {
+        // 1. Tìm đơn hàng và các thông tin liên quan
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new InvalidDataException("Không tìm thấy đơn đặt tour với ID: " + bookingId));
+
+        Tour tour = booking.getTour();
+
+        // 2. Kiểm tra các điều kiện tiên quyết
+        // Đơn hàng phải ở trạng thái "CANCELLED" mới có thể khôi phục.
+        if (booking.getStatus() != BookingStatus.CANCELLED) {
+            throw new InvalidDataException("Chỉ có thể khôi phục các đơn hàng đã bị hủy.");
+        }
+
+        // Nếu refund đã được xử lý (đã trả tiền) thì không thể khôi phục.
+        Refund refund = booking.getRefund();
+        if (refund != null && refund.getStatus() != RefundStatus.IN_PROCESS) {
+            throw new InvalidDataException("Không thể khôi phục vì yêu cầu hoàn tiền đã được xử lý.");
+        }
+
+        // Kiểm tra xem tour đã bắt đầu hay chưa.
+        Instant now = Instant.now();
+        Instant startAt = tour.getStartDate().atZone(ZoneId.systemDefault()).toInstant();
+        if (now.isAfter(startAt)) {
+            throw new InvalidDataException("Không thể khôi phục vì tour đã bắt đầu hoặc đã kết thúc.");
+        }
+
+        // Kiểm tra sức chứa còn lại của tour.
+        int requiredCapacity = booking.getAdults() + booking.getChildren();
+        if (tour.getCapacity() < requiredCapacity) {
+            throw new InvalidDataException("Không thể khôi phục vì tour đã hết chỗ. Sức chứa còn lại: " + tour.getCapacity());
+        }
+
+        // 3. Cập nhật thông tin đơn hàng (thực hiện logic ngược lại với cancel)
+        // Cập nhật lại sức chứa của tour (giảm đi số khách của đơn này).
+        tour.setCapacity(tour.getCapacity() - requiredCapacity);
+
+        // Cập nhật trạng thái đơn hàng.
+        // Dùng trạng thái REINSTATED để ghi nhận, hoặc CONFIRMED nếu muốn quay về như cũ.
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        booking.setCancelDate(null); // Xóa ngày hủy
+
+        // Xóa thông tin hoàn tiền.
+        booking.setRefund(null);
+
+        // 4. Lưu thay đổi vào cơ sở dữ liệu
+        Booking updatedBooking = bookingRepo.save(booking);
+
+        // 5. Gửi email thông báo cho khách hàng (tùy chọn)
+        Booking bookingFull = bookingRepo.findFullById(bookingId)
+                .orElseThrow(() -> new InvalidDataException("Booking not found after update"));
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Bạn cần tạo một phương thức email mới cho việc này
+                emailService.sendBookingReinstatedEmail(bookingFull);
+            } catch (Exception e) {
+                System.err.println("Failed to send reinstatement email for booking " + bookingFull.getId() + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        // 6. Trả về kết quả sau khi chuyển đổi qua DTO
+        return mapToBookingResponse(updatedBooking);
+    }
+
     public List<BookingResponse> searchBookings(Long bookingId, String keyword, Pageable pageable) {
         Specification<Booking> spec = Specification
                 .where(BookingSpecification.hasBookingId(bookingId))
@@ -335,28 +368,24 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public BookingResponse mapToBookingResponse(Booking booking) {
-        BookingResponse response = BookingResponse.builder()
+        // Lấy thông tin RefundDTO, sẽ là null nếu booking.getRefund() là null
+        RefundDTO refundDto = (booking.getRefund() != null)
+                ? RefundDTO.mapToDto(booking.getRefund())
+                : null;
+
+        return BookingResponse.builder()
                 .id(booking.getId())
-                .customerName(booking.getUser() != null ? booking.getUser().getFullName() : booking.getGuestName())
-                .customerEmail(booking.getUser() != null ? booking.getUser().getEmail() : booking.getGuestEmail())
+                .customerName(booking.getUserName())
+                .customerEmail(booking.getEmail())
                 .customerPhone(booking.getUser() != null ? booking.getUser().getPhone() : booking.getGuestPhone())
+
                 .totalPrice(booking.getTotalPrice())
                 .status(booking.getStatus().name())
                 .bookingAt(booking.getBookingDate())
                 .promotionDto(PromotionDTO.fromDomain(booking.getPromotion()))
-                .participants(
-                        booking.getParticipants() == null ? new ArrayList<>() :
-                                Arrays.stream(
-                                                booking.getParticipants().split("##")
-                                        ).map(json -> {
-                                            try {
-                                                return new ObjectMapper().readValue(json, Participant.class);
-                                            } catch (JsonProcessingException e) {
-                                                return new Participant();
-                                            }
-                                        })
-                                        .collect(Collectors.toList())
-                )
+
+                .participants(booking.getParticipants())
+
                 .cancelAt(booking.getCancelDate())
                 .tour(
                         BookingResponse.TourDto.builder()
@@ -366,12 +395,8 @@ public class BookingServiceImpl implements BookingService {
                                 .startDate(booking.getTour().getStartDate())
                                 .build()
                 )
+                .refund(refundDto)
                 .build();
-
-        if (booking.getRefund() != null) {
-            response.setRefund(RefundDTO.mapToDto(booking.getRefund()));
-        }
-        return response;
     }
 
     public void updateBookingStatus(Long bookingId, BookingStatus status) {

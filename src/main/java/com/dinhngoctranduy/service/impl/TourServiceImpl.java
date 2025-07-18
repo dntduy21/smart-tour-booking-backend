@@ -1,5 +1,9 @@
 package com.dinhngoctranduy.service.impl;
 
+import com.dinhngoctranduy.model.TourCategory;
+import com.dinhngoctranduy.model.dto.TourCategoryDTO;
+import com.dinhngoctranduy.repository.TourCategoryRepository;
+import com.dinhngoctranduy.service.RecommendationClient;
 import com.dinhngoctranduy.util.error.InvalidDataException;
 import com.dinhngoctranduy.model.Image;
 import com.dinhngoctranduy.model.Tour;
@@ -22,6 +26,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +38,11 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
 
-import java.nio.file.Paths;
-
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +53,8 @@ import java.util.stream.Collectors;
 public class TourServiceImpl implements TourService {
 
     private final TourRepository tourRepository;
+    private final TourCategoryRepository categoryRepository;
+    private final RecommendationClient recommendationClient;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
@@ -95,8 +100,10 @@ public class TourServiceImpl implements TourService {
                     if (dto.getRegion() != null && !dto.getRegion().equals(tour.getRegion())) {
                         tour.setRegion(dto.getRegion());
                     }
-                    if (dto.getCategory() != null && !dto.getCategory().equals(tour.getCategory())) {
-                        tour.setCategory(dto.getCategory());
+                    if (dto.getCategoryId() != null && !dto.getCategoryId().equals(tour.getCategory().getId())) {
+                        TourCategory newCategory = categoryRepository.findById(dto.getCategoryId())
+                                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.getCategoryId()));
+                        tour.setCategory(newCategory);
                     }
                     if (dto.getAirline() != null && !dto.getAirline().equals(tour.getAirline())) {
                         tour.setAirline(dto.getAirline());
@@ -158,6 +165,8 @@ public class TourServiceImpl implements TourService {
     }
 
     private Tour toEntity(TourRequestDTO dto) {
+        TourCategory category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.getCategoryId()));
         Tour tour = Tour.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
@@ -168,7 +177,7 @@ public class TourServiceImpl implements TourService {
                 .endDate(dto.getEndDate())
                 .destination(dto.getDestination())
                 .region(dto.getRegion())
-                .category(dto.getCategory())
+                .category(category)
                 .airline(dto.getAirline())
                 .code(dto.getCode())
                 .available(dto.getAvailable() != null && dto.getAvailable())
@@ -199,7 +208,7 @@ public class TourServiceImpl implements TourService {
         dto.setEndDate(t.getEndDate());
         dto.setDestination(t.getDestination());
         dto.setRegion(t.getRegion());
-        dto.setCategory(t.getCategory());
+        dto.setCategory(TourCategoryDTO.fromEntity(t.getCategory()));
         dto.setAirline(t.getAirline());
         dto.setCode(t.getCode());
         dto.setAvailable(t.isAvailable());
@@ -255,7 +264,7 @@ public class TourServiceImpl implements TourService {
             throw new InvalidDataException("Region không được để trống");
         }
 
-        if (dto.getCategory() == null) {
+        if (dto.getCategoryId() == null) {
             throw new InvalidDataException("Category không được để trống");
         }
 
@@ -264,13 +273,21 @@ public class TourServiceImpl implements TourService {
         }
     }
 
-
     @Override
     public Page<TourResponseDTO> getAllTours(int page, int size, Boolean isDeleted) {
-        Page<Tour> tourPage = isDeleted != null ? tourRepository.findAllByDeletedFalse((Pageable) PageRequest.of(page, size))
-                : tourRepository.findAll((Pageable) PageRequest.of(page, size));
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Tour> tourPage;
+
+        if (isDeleted != null && !isDeleted) {
+            tourPage = tourRepository.findAllByDeletedFalseOrderByUpcoming(LocalDateTime.now(), pageable);
+        } else {
+            tourPage = tourRepository.findAllOrderByUpcomingFirst(LocalDateTime.now(), pageable);
+        }
+
         return tourPage.map(this::toDto);
     }
+
 
     @Override
     public byte[] exportToursToPdf(int page, int size) {
@@ -285,7 +302,15 @@ public class TourServiceImpl implements TourService {
     @Override
     public List<TourResponseDTO> searchTours(TourSearchRequest request, Boolean isDeleted) {
         Specification<Tour> spec = TourSpecification.search(request, isDeleted);
-        return tourRepository.findAll(spec).stream()
+        List<Tour> result = tourRepository.findAll(spec);
+
+        if (result.isEmpty()) {
+            // Nếu không tìm thấy kết quả, gọi gợi ý từ hệ thống gợi ý
+            List<Long> recommendedIds = recommendationClient.getSimilarToursFromFilters(request);
+            result = tourRepository.findAllById(recommendedIds);
+        }
+
+        return result.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
@@ -345,7 +370,7 @@ public class TourServiceImpl implements TourService {
                 table.addCell(new Paragraph(String.format("%,.0f", tour.getPriceAdults())));
                 table.addCell(new Paragraph(String.format("%,.0f", tour.getPriceChildren())));
                 table.addCell(new Paragraph(tour.getCode()));
-                table.addCell(new Paragraph(tour.getCategory().toString()));
+                table.addCell(new Paragraph(tour.getCategory() != null ? tour.getCategory().getName() : ""));
                 table.addCell(new Paragraph(tour.getRegion().toString()));
                 table.addCell(new Paragraph(tour.getDestination()));
                 table.addCell(new Paragraph(
@@ -400,7 +425,7 @@ public class TourServiceImpl implements TourService {
                 row.createCell(7).setCellValue(tour.getEndDate() != null ? tour.getEndDate().format(formatter) : "");
                 row.createCell(8).setCellValue(tour.getDestination());
                 row.createCell(9).setCellValue(tour.getRegion() != null ? tour.getRegion().name() : "");
-                row.createCell(10).setCellValue(tour.getCategory() != null ? tour.getCategory().name() : "");
+                row.createCell(10).setCellValue(tour.getCategory() != null ? tour.getCategory().getName() : "");
                 row.createCell(11).setCellValue(tour.getAirline());
                 row.createCell(12).setCellValue(tour.getCode());
                 row.createCell(13).setCellValue(tour.getAvailable());
@@ -418,5 +443,49 @@ public class TourServiceImpl implements TourService {
 
         tour.setAvailable(available);
         return tourRepository.save(tour);
+    }
+
+    @Override
+    public Page<TourResponseDTO> getUpcomingTours(int page, int size) {
+        // Sắp xếp các tour sắp tới theo ngày bắt đầu tăng dần (tour nào gần nhất sẽ lên đầu)
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "startDate"));
+        LocalDateTime now = LocalDateTime.now();
+        Page<Tour> tourPage = tourRepository.findUpcomingTours(now, pageable);
+        return tourPage.map(this::toDto);
+    }
+
+    @Override
+    public Page<TourResponseDTO> getOngoingTours(int page, int size) {
+        // Sắp xếp các tour đang diễn ra theo ngày kết thúc tăng dần (tour nào sắp hết hạn sẽ lên đầu)
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "endDate"));
+        LocalDateTime now = LocalDateTime.now();
+        Page<Tour> tourPage = tourRepository.findOngoingTours(now, pageable);
+        return tourPage.map(this::toDto);
+    }
+
+    @Override
+    public Page<TourResponseDTO> getFinishedTours(int page, int size) {
+        // Sắp xếp các tour đã kết thúc theo ngày kết thúc giảm dần (tour nào mới kết thúc sẽ lên đầu)
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "endDate"));
+        LocalDateTime now = LocalDateTime.now();
+        Page<Tour> tourPage = tourRepository.findFinishedTours(now, pageable);
+        return tourPage.map(this::toDto);
+    }
+
+    @Override
+    public Page<TourResponseDTO> getToursByCategoryId(Long categoryId, int page, int size) {
+        // 1. Kiểm tra xem category có tồn tại không
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new EntityNotFoundException("Không tìm thấy thể loại với ID: " + categoryId);
+        }
+
+        // 2. Tạo đối tượng Pageable để phân trang và sắp xếp
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        // 3. Gọi phương thức repository
+        Page<Tour> tourPage = tourRepository.findByCategoryIdAndDeletedFalse(categoryId, pageable);
+
+        // 4. Chuyển đổi Page<Tour> thành Page<TourResponseDTO>
+        return tourPage.map(this::toDto);
     }
 }

@@ -20,6 +20,7 @@ public class RefundDTO {
     private double refundAmount;
     private RefundStatus status;
     private Long bookingId;
+    private String proofImageUrl;
 
     public static RefundDTO mapToDto(Refund refund) {
         if (refund == null) return null;
@@ -32,6 +33,7 @@ public class RefundDTO {
                 .refundAmount(refund.getRefundAmount())
                 .status(refund.getStatus())
                 .bookingId(refund.getBooking() != null ? refund.getBooking().getId() : null)
+                .proofImageUrl(refund.getProofImageUrl())
                 .build();
     }
 
@@ -46,6 +48,7 @@ public class RefundDTO {
                 .refundAmount(dto.getRefundAmount())
                 .status(dto.getStatus())
                 .booking(booking)
+                .proofImageUrl(dto.getProofImageUrl())
                 .build();
     }
 }

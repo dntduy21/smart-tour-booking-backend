@@ -424,4 +424,170 @@ public class EmailService {
                 .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));  // múi giờ VN
         return formatter.format(instant);
     }
+
+    public void sendBookingReinstatedEmail(Booking booking) {
+        String to = booking.getEmail();
+        String subject = "SmartTour: Đơn hàng của bạn đã được khôi phục thành công";
+
+        String htmlContent = buildBookingReinstatedHtml(booking);
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
+
+    private String buildBookingReinstatedHtml(Booking booking) {
+        DecimalFormat currencyFormatter = new DecimalFormat("#,###");
+        String reinstatedTime = formatInstantToReadable(Instant.now());
+
+        return """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Khôi phục Đơn hàng thành công - SmartTour</title>
+                    <style>
+                        body {
+                            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                            margin: 0; padding: 0; background-color: #f4f4f4; color: #333;
+                        }
+                        .container {
+                            max-width: 600px; margin: 20px auto; background-color: #ffffff;
+                            border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #28a745; /* Màu xanh lá cho sự thành công/khôi phục */
+                            color: #ffffff; padding: 20px; text-align: center;
+                        }
+                        .header h1 {
+                            margin: 0; font-size: 28px;
+                        }
+                        .content {
+                            padding: 25px; line-height: 1.6; font-size: 16px;
+                        }
+                        .content p {
+                            margin-bottom: 10px;
+                        }
+                        .highlight {
+                            background-color: #e9f5e9; /* Nền xanh lá nhạt */
+                            border-left: 5px solid #28a745;
+                            padding: 15px; margin: 20px 0; border-radius: 4px;
+                        }
+                        .highlight strong {
+                            color: #155724; /* Xanh lá đậm */
+                        }
+                        .detail-list {
+                            list-style: none; padding: 0; margin: 15px 0;
+                        }
+                        .detail-list li {
+                            margin-bottom: 8px;
+                        }
+                        .detail-list strong {
+                            display: inline-block; width: 140px;
+                        }
+                        .footer {
+                            background-color: #f2f2f2; color: #777; padding: 20px;
+                            text-align: center; font-size: 13px; border-top: 1px solid #eee;
+                        }
+                        .footer p {
+                            margin: 5px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Đơn Hàng Được Khôi Phục</h1>
+                        </div>
+                        <div class="content">
+                            <p>Xin chào <strong>%s</strong>,</p>
+                            <p>Chúng tôi vui mừng thông báo rằng đơn hàng đã hủy của bạn đã được khôi phục thành công theo yêu cầu. Đơn hàng của bạn hiện đã <strong>hoạt động trở lại</strong>.</p>
+                
+                            <div class="highlight">
+                                <p><strong>Thông tin chi tiết đơn hàng được khôi phục:</strong></p>
+                                <ul class="detail-list">
+                                    <li><strong>Tên Tour:</strong> %s</li>
+                                    <li><strong>Mã Đơn hàng:</strong> %s</li>
+                                    <li><strong>Tổng chi phí:</strong> %s VND</li>
+                                    <li><strong>Ngày khôi phục:</strong> %s</li>
+                                </ul>
+                            </div>
+                
+                            <p>Tất cả thông tin chi tiết về chuyến đi của bạn đã được giữ lại. Vui lòng chuẩn bị cho một cuộc phiêu lưu thú vị sắp tới!</p>
+                            <p>Nếu bạn có bất kỳ câu hỏi nào, xin đừng ngần ngại liên hệ với chúng tôi.</p>
+                        </div>
+                        <div class="footer">
+                            <p>Trân trọng,</p>
+                            <p>Đội ngũ hỗ trợ SmartTour</p>
+                            <p>Bản quyền &copy; %d SmartTour. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(
+                booking.getUserName(),
+                booking.getTour().getTitle(),
+                booking.getId(),
+                currencyFormatter.format(booking.getTotalPrice()),
+                reinstatedTime,
+                java.time.Year.now().getValue()
+        );
+    }
+
+    public void sendPasswordResetEmail(User user, String newPassword) {
+        final String APP_NAME = "SmartTour";
+        final String subject = "Mật khẩu mới cho tài khoản " + APP_NAME + " của bạn";
+        String htmlContent = buildPasswordResetEmailHtml(user.getFullName(), newPassword, APP_NAME);
+
+        // Gọi lại hàm sendHtmlEmail đã có
+        sendHtmlEmail(user.getEmail(), subject, htmlContent);
+    }
+
+    private String buildPasswordResetEmailHtml(String fullName, String newPassword, String appName) {
+        return """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Cấp Lại Mật Khẩu</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
+                        .container { max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+                        .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+                        .header h1 { margin: 0; font-size: 24px; }
+                        .content { padding: 30px; line-height: 1.7; color: #333; }
+                        .content p { margin-bottom: 15px; }
+                        .password-box { background-color: #e9ecef; border: 1px dashed #ced4da; border-radius: 5px; padding: 15px; text-align: center; margin: 20px 0; }
+                        .password-box b { font-size: 20px; color: #dc3545; letter-spacing: 2px; font-family: 'Courier New', Courier, monospace; }
+                        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; background-color: #f8f9fa; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Yêu Cầu Cấp Lại Mật Khẩu</h1>
+                        </div>
+                        <div class="content">
+                            <p>Xin chào <strong>%s</strong>,</p>
+                            <p>Bạn đã yêu cầu cấp lại mật khẩu cho tài khoản của mình tại %s.</p>
+                            <p>Dưới đây là mật khẩu mới của bạn:</p>
+                            <div class="password-box">
+                                <b>%s</b>
+                            </div>
+                            <p>Để đảm bảo an toàn, vui lòng đăng nhập bằng mật khẩu này và đổi sang một mật khẩu khác mà bạn có thể ghi nhớ.</p>
+                            <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+                        </div>
+                        <div class="footer">
+                            <p>Trân trọng,<br>Đội ngũ %s</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(
+                fullName,
+                appName,
+                newPassword,
+                appName
+        );
+    }
 }

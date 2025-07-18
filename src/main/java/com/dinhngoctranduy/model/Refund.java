@@ -28,6 +28,9 @@ public class Refund {
     @Enumerated(EnumType.STRING)
     private RefundStatus status;
 
+    @Column(length = 512)
+    private String proofImageUrl;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;

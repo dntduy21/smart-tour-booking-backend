@@ -9,7 +9,9 @@ import com.dinhngoctranduy.model.response.ResUpdateUserDTO;
 import com.dinhngoctranduy.model.response.ResUserDTO;
 import com.dinhngoctranduy.repository.UserRepository;
 import com.dinhngoctranduy.repository.UserSpecification;
+import com.dinhngoctranduy.util.PasswordGenerator;
 import com.dinhngoctranduy.util.error.UserNotFoundExceptionCustom;
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,10 +26,12 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public User handleCreateUser(User user) {
@@ -233,6 +237,28 @@ public class UserService {
         resUpdateUserDTO.setBirthDate(user.getBirthDate());
         resUpdateUserDTO.setGender(user.getGender());
         return resUpdateUserDTO;
+    }
+
+    public void handleForgotPassword(String email) throws MessagingException {
+        Optional<User> userOptional = this.userRepository.findByEmail(email);
+
+        // Chỉ xử lý nếu email tồn tại trong hệ thống
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // 1. Tạo mật khẩu mới (7 ký tự)
+            String newPassword = PasswordGenerator.generateRandomPassword(7);
+
+            // 2. Mã hóa mật khẩu mới trước khi lưu
+            String encodedPassword = this.passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+
+            // 3. Cập nhật người dùng trong DB
+            this.userRepository.save(user);
+
+            // 4. Gửi email chứa mật khẩu MỚI (chưa mã hóa) cho người dùng
+            this.emailService.sendPasswordResetEmail(user, newPassword);
+        }
     }
 
 }

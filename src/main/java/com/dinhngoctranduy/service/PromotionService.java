@@ -1,5 +1,6 @@
 package com.dinhngoctranduy.service;
 
+import com.dinhngoctranduy.model.Promotion;
 import com.dinhngoctranduy.model.request.PromotionRequest;
 import com.dinhngoctranduy.model.response.PromotionResponse;
 import org.springframework.data.domain.Pageable;
@@ -22,4 +23,6 @@ public interface PromotionService {
     List<PromotionResponse> searchByDescription(String keyword);
 
     List<PromotionResponse> getCustom(Pageable pageable);
+
+    Promotion getValidPromotionByCode(String code);
 }

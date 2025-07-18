@@ -39,7 +39,8 @@ public class Booking {
     private String guestEmail;
     private String guestPhone;
 
-    private String participants;
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Participant> participants = new ArrayList<>();
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,9 +50,6 @@ public class Booking {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
-
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Invoice invoice;
 
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Checkout checkout;
@@ -64,11 +62,27 @@ public class Booking {
     private Promotion promotion;
 
     public String getEmail() {
-        return user == null? guestEmail : user.getEmail();
+        return user == null ? guestEmail : user.getEmail();
     }
 
     public String getUserName() {
-        return user == null? guestName : user.getFullName();
+        return user == null ? guestName : user.getFullName();
     }
 
+    public void setParticipantsAndLink(List<Participant> participants) {
+        // Xóa danh sách cũ nếu có
+        if (this.participants == null) {
+            this.participants = new ArrayList<>();
+        } else {
+            this.participants.clear();
+        }
+
+        // Thêm danh sách mới và thiết lập liên kết ngược lại
+        if (participants != null) {
+            for (Participant p : participants) {
+                p.setBooking(this); // Quan trọng: Gán booking này cho từng participant
+                this.participants.add(p);
+            }
+        }
+    }
 }

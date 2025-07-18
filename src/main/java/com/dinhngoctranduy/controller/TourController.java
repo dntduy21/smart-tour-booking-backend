@@ -126,4 +126,27 @@ public class TourController {
         return ResponseEntity.ok("Cập nhật trạng thái thành công cho tour ID: " + id);
     }
 
+    @GetMapping("/upcoming")
+    public ResponseEntity<Page<TourResponseDTO>> getUpcomingTours(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10000000") int size) {
+        Page<TourResponseDTO> tours = tourService.getUpcomingTours(page, size);
+        return ResponseEntity.ok(tours);
+    }
+
+    @GetMapping("/ongoing")
+    public ResponseEntity<Page<TourResponseDTO>> getOngoingTours(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1000000") int size) {
+        Page<TourResponseDTO> tours = tourService.getOngoingTours(page, size);
+        return ResponseEntity.ok(tours);
+    }
+
+    @GetMapping("/finished")
+    public ResponseEntity<Page<TourResponseDTO>> getFinishedTours(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1000000") int size) {
+        Page<TourResponseDTO> tours = tourService.getFinishedTours(page, size);
+        return ResponseEntity.ok(tours);
+    }
 }

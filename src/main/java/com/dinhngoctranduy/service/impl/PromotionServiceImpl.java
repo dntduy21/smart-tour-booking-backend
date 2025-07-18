@@ -126,6 +126,32 @@ public class PromotionServiceImpl implements PromotionService {
                 .build();
     }
 
+    @Override
+    public Promotion getValidPromotionByCode(String code) {
+        Instant now = Instant.now();
+
+        // 1. Dùng phương thức có sẵn để tìm mã hoặc ném lỗi nếu không tồn tại
+        Promotion promotion = promotionRepository.findByCodeAndActiveTrue(code)
+                .orElseThrow(() -> new IllegalArgumentException("Mã khuyến mãi không hợp lệ hoặc không tồn tại."));
+
+        // 2. Kiểm tra lượt sử dụng
+        if (promotion.getUsageLimit() <= 0) {
+            throw new IllegalArgumentException("Mã khuyến mãi này đã hết lượt sử dụng.");
+        }
+
+        // 3. Kiểm tra ngày bắt đầu
+        if (now.isBefore(promotion.getStartAt())) {
+            throw new IllegalArgumentException("Chưa đến ngày áp dụng mã khuyến mãi này.");
+        }
+
+        // 4. Kiểm tra ngày hết hạn
+        if (now.isAfter(promotion.getEndAt())) {
+            throw new IllegalArgumentException("Mã khuyến mãi đã hết hạn sử dụng.");
+        }
+        // Nếu mọi thứ hợp lệ, trả về đối tượng promotion
+        return promotion;
+    }
+
     public void createAndSendWelcomePromotion(User user) {
         CompletableFuture.runAsync(() -> {
             try {

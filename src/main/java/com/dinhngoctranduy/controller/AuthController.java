@@ -239,4 +239,15 @@ public class AuthController {
 
         return dto;
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
+        try {
+            userService.handleForgotPassword(email);
+            return ResponseEntity.ok("Mật khẩu đã gửi đến email của bạn hãy mở và kiểm tra");
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi gửi email. Vui lòng thử lại sau.");
+        }
+    }
 }

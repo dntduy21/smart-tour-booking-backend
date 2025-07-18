@@ -54,6 +54,8 @@ public class SecurityConfig {
                 "/api/v1/bookings/search",
                 "/api/v1/bookings/*/cancel",
                 "/api/v1/bookings/vnpay-return",
+                "/api/v1/public/contact/primary",
+                "/api/v1/forgot-password",
 
         };
         http
@@ -66,6 +68,15 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/reviews/tour/{tourId}").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/*/export/pdf").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/categories/{id}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/posts").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/posts/search").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/tours/upcoming").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/tours/finished").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/tours/ongoing").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/categories/{id}/tours").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

@@ -54,37 +54,30 @@ public class RoleService {
 
     @Transactional
     public Role update(Role r) {
-        // 1. Lấy Role hiện tại từ cơ sở dữ liệu
         Role roleDB = this.fetchById(r.getId());
 
-        // 2. Cập nhật các thuộc tính cơ bản của Role
         roleDB.setName(r.getName());
         roleDB.setDescription(r.getDescription());
         roleDB.setActive(r.isActive());
 
-        // 3. Xử lý cập nhật permissions: giữ lại cái cũ, thêm cái mới (nếu có)
         if (r.getPermissions() != null) {
-            Set<Long> requestedPermissionIds = r.getPermissions()
-                    .stream()
-                    .filter(p -> p != null && p.getId() != 0L)
-                    .map(Permission::getId)
-                    .collect(Collectors.toSet());
+            if (r.getPermissions().isEmpty()) {
+                roleDB.setPermissions(new ArrayList<>());
+            } else {
+                Set<Long> requestedPermissionIds = r.getPermissions()
+                        .stream()
+                        .filter(p -> p != null && p.getId() != 0L)
+                        .map(Permission::getId)
+                        .collect(Collectors.toSet());
 
-            Set<Permission> finalPermissions = new HashSet<>();
-            if (roleDB.getPermissions() != null) {
-                finalPermissions.addAll(roleDB.getPermissions()); // Thêm tất cả các permission hiện có
+                List<Permission> updatedPermissions = this.permissionRepository.findByIdIn(new ArrayList<>(requestedPermissionIds));
+                roleDB.setPermissions(updatedPermissions);
             }
-
-            if (!requestedPermissionIds.isEmpty()) {
-                List<Permission> newPermissionsToAddFromDB = this.permissionRepository.findByIdIn(new ArrayList<>(requestedPermissionIds));
-                finalPermissions.addAll(newPermissionsToAddFromDB);
-            }
-            roleDB.setPermissions(new ArrayList<>(finalPermissions));
         }
 
-        // 4. Lưu Role đã cập nhật vào cơ sở dữ liệu
         return this.roleRepository.save(roleDB);
     }
+
 
     public void delete(long id) {
         this.roleRepository.deleteById(id);

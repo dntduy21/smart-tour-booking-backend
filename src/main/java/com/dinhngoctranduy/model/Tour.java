@@ -1,7 +1,6 @@
 package com.dinhngoctranduy.model;
 
 import com.dinhngoctranduy.util.StringListConverter;
-import com.dinhngoctranduy.util.constant.TourCategory;
 import com.dinhngoctranduy.util.constant.TourRegion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -41,7 +40,8 @@ public class Tour {
     @Enumerated(EnumType.STRING)
     private TourRegion region;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
     private TourCategory category;
 
     // 3. Hãng hàng không
@@ -68,6 +68,7 @@ public class Tour {
     private boolean deleted = false;
 
     @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "LONGTEXT")
     private List<String> itinerary = new ArrayList<>();
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

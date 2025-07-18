@@ -1,6 +1,5 @@
 package com.dinhngoctranduy.model.request;
 
-import com.dinhngoctranduy.util.constant.TourCategory;
 import com.dinhngoctranduy.util.constant.TourRegion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -47,7 +46,7 @@ public class TourRequestDTO {
     private TourRegion region;
 
     @NotNull
-    private TourCategory category;
+    private Long categoryId;
 
     private String airline;
 

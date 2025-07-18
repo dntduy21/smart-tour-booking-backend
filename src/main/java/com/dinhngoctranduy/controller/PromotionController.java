@@ -1,5 +1,8 @@
 package com.dinhngoctranduy.controller;
 
+import com.dinhngoctranduy.model.Promotion;
+import com.dinhngoctranduy.model.request.ValidatePromotionRequest;
+import com.dinhngoctranduy.model.response.ValidatePromotionResponse;
 import com.dinhngoctranduy.model.request.PromotionRequest;
 import com.dinhngoctranduy.model.response.PromotionResponse;
 import com.dinhngoctranduy.model.request.SendPromotionEmailRequest;
@@ -10,11 +13,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -62,6 +68,28 @@ public class PromotionController {
     @GetMapping("/{id}")
     public ResponseEntity<PromotionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(promotionService.getById(id));
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validatePromotion(@RequestBody ValidatePromotionRequest request) {
+        try {
+            Promotion validPromotion = promotionService.getValidPromotionByCode(request.getCode());
+
+            // Nếu không có lỗi, tạo response thành công
+            ValidatePromotionResponse response = ValidatePromotionResponse.builder()
+                    .valid(true)
+                    .message("Áp dụng mã khuyến mãi thành công!")
+                    .discountPercent(validPromotion.getDiscountPercent())
+                    .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("valid", "false");
+            error.put("message", e.getMessage());
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/search")
