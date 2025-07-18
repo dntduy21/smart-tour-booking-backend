@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
     }
 
-    @ExceptionHandler(value = {IdInValidException.class, UsernameNotFoundException.class, BadCredentialsException.class})
+    @ExceptionHandler(value = {IdInValidException.class, UsernameNotFoundException.class})
     public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -79,4 +79,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<RestResponse<Object>> handleBadCredentials(BadCredentialsException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        res.setMessage("Sai tên đăng nhập hoặc mật khẩu");
+        res.setError("Unauthorized");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+    }
 }

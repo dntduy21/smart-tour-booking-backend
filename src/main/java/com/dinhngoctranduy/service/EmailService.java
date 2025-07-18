@@ -390,7 +390,7 @@ public class EmailService {
                                     <li><strong>Phí Hủy Tour:</strong> %s%%</li>
                                     <li><strong>Số Tiền Hoàn Lại Dự Kiến:</strong> %s VND</li>
                                 </ul>
-                                <p>Số tiền hoàn lại sẽ được xử lý trong vòng <strong>3 ngày làm việc</strong></p>
+                                <p>Số tiền hoàn lại sẽ được xử lý trong vòng <strong>15 ngày làm việc</strong></p>
                             </div>
                 
                             <p>Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ thêm, vui lòng liên hệ với bộ phận hỗ trợ khách hàng của chúng tôi.</p>
