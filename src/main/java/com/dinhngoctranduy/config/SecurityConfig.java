@@ -56,7 +56,7 @@ public class SecurityConfig {
                 "/api/v1/bookings/vnpay-return",
                 "/api/v1/public/contact/primary",
                 "/api/v1/forgot-password",
-
+                "/api/v1/bookings/{id}"
         };
         http
                 .csrf(c -> c.disable())
@@ -78,6 +78,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tours/ongoing").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/{id}/tours").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/banners").permitAll()
+                                .requestMatchers("/banners/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

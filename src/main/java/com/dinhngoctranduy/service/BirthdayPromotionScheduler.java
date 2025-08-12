@@ -22,7 +22,7 @@ public class BirthdayPromotionScheduler {
     private final UserRepository userRepository;
     private final PromotionServiceImpl promotionService;
 
-    @Scheduled(cron = "0 6 22 * * ?", zone = "Asia/Ho_Chi_Minh")
+    @Scheduled(cron = "0 0 7 * * ?", zone = "Asia/Ho_Chi_Minh")
     public void sendBirthdayPromotions() {
         log.info("--- [SCHEDULER] Bắt đầu tác vụ kiểm tra và gửi quà sinh nhật ---");
 

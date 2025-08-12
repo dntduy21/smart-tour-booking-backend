@@ -66,13 +66,16 @@ public class HtmlBuilder {
 
         html.append("</body></html>");
 
-        String s =  StringEscapeUtils.unescapeHtml4(html.toString());
-        return s;
+        return html.toString();
     }
 
     private static String escape(String input) {
-        return input == null ? "" : StringEscapeUtils.escapeHtml4(input);
+        if (input == null) return "";
+        String unicode = StringEscapeUtils.unescapeHtml4(input);
+
+        return StringEscapeUtils.escapeXml11(unicode); // À => &#192;
     }
+
 
     public static String safeHtml(String rawHtml) {
         return rawHtml.replaceAll("&(?!amp;|lt;|gt;|quot;|#\\d+;)", "&amp;");

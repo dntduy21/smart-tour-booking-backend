@@ -50,14 +50,17 @@ public interface TourRepository extends JpaRepository<Tour, Long>, JpaSpecificat
     Page<Tour> findAllOrderByUpcomingFirst(@Param("now") LocalDateTime now, Pageable pageable);
 
     @Query(value = """
-            SELECT * FROM tours 
-            WHERE deleted = false
+            SELECT * FROM tours t
+            WHERE t.deleted = false
             ORDER BY 
-                CASE WHEN end_date >= :now THEN 0 ELSE 1 END,
-                start_date ASC
+                CASE 
+                    WHEN t.start_date > :now THEN 1
+                    WHEN t.start_date <= :now AND t.end_date >= :now THEN 2
+                    ELSE 3
+                END,
+                t.start_date ASC
             """,
-            countQuery = "SELECT count(*) FROM tours WHERE deleted = false",
+            countQuery = "SELECT COUNT(*) FROM tours t WHERE t.deleted = false",
             nativeQuery = true)
     Page<Tour> findAllByDeletedFalseOrderByUpcoming(@Param("now") LocalDateTime now, Pageable pageable);
-
 }
